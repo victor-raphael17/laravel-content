@@ -487,9 +487,6 @@ src/.env
       retries: 10
 
   php:
-    depends_on:
-      mysql:
-        condition: service_healthy
     build: .
     ports:
       - "8000:8000"
