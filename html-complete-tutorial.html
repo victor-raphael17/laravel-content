@@ -197,7 +197,7 @@ footer.end {
   <ol class="toc">
     <li><a href="#introducao">Introdução — o que vamos construir</a></li>
     <li><a href="#passo-1">Passo 1 — Instalação e primeiro projeto</a></li>
-    <li><a href="#passo-2">Passo 2 — (Opcional) Ambiente com Docker</a></li>
+    <li><a href="#passo-2">Passo 2 — Ambiente com Docker</a></li>
     <li><a href="#passo-3">Passo 3 — Conhecendo o projeto por dentro</a></li>
     <li><a href="#passo-4">Passo 4 — MVC: o mapa mental do Laravel</a></li>
     <li><a href="#passo-5">Passo 5 — Banco de dados: migrations e seeders</a></li>
@@ -289,7 +289,7 @@ footer.end {
   <p><strong>Laravel</strong> é um framework PHP: um conjunto de peças prontas e bem testadas — roteamento, acesso a banco de dados, validação, linha de comando — sobre o qual você constrói a sua aplicação. Em vez de reinventar essas peças, você escreve apenas o que é específico do seu projeto.</p>
   <p><strong>Composer</strong> é o gerenciador de dependências do PHP (o equivalente ao <code>npm</code> do JavaScript ou ao <code>pip</code> do Python). É ele quem baixa o Laravel e todas as bibliotecas de que o projeto precisa.</p>
   <p>O Laravel também traz o <strong>Artisan</strong>, uma ferramenta de linha de comando (<code>php artisan ...</code>) que vamos usar o tempo todo: para subir o servidor, criar arquivos, rodar migrations e muito mais.</p>
-  <p>Requisitos desta seção: o Laravel 12 exige <strong>PHP entre 8.2 e 8.4</strong> — neste curso usamos o <strong>PHP 8.4</strong> — e um banco de dados (usaremos <strong>MySQL</strong>).</p>
+  <p>Requisitos desta seção: o Laravel 12 exige <strong>PHP entre 8.2 e 8.4</strong> — neste curso usamos o <strong>PHP 8.4</strong> — e um banco de dados (usaremos <strong>MySQL</strong>, que vai subir <strong>via Docker no Passo 2</strong>; nada de instalar MySQL na máquina).</p>
 
   <h3>Mão na massa: instalando o PHP 8.4 (Ubuntu)</h3>
   <p>O PPA do Ondřej Šurý é o repositório de referência do PHP para Debian/Ubuntu. Instale o PHP 8.4 com as extensões que o Laravel e o MySQL precisam:</p>
@@ -324,110 +324,68 @@ composer --version</code></pre>
   </figure>
 
   <h3>Mão na massa: criando o projeto BookShelf</h3>
-  <p>Agora nasce o nosso projeto. O comando abaixo baixa o esqueleto do Laravel 12 na pasta <code>bookshelf-api</code> e instala todas as dependências:</p>
+  <p>Agora nasce o nosso projeto. Para separar o código da aplicação dos arquivos de infraestrutura que criaremos no Passo 2 (Dockerfiles, <code>compose.yaml</code>), o projeto Laravel vai morar dentro de uma pasta <code>src/</code>. O <code>create-project</code> baixa o esqueleto do Laravel 12 e instala todas as dependências:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
-    <pre><code>composer create-project laravel/laravel bookshelf-api "12.*"
+    <pre><code>mkdir bookshelf-api
 cd bookshelf-api
+composer create-project laravel/laravel src "12.*"
+cd src
 php artisan serve</code></pre>
   </figure>
+
+  <p>Se aparecer um <strong>erro de conexão com banco de dados</strong> no final do <code>create-project</code>, ignore por enquanto — o MySQL só vai existir no Passo 2, via Docker.</p>
 
   <p>O <code>php artisan serve</code> sobe o servidor de desenvolvimento em <code>http://localhost:8000</code>. Abra esse endereço no navegador: você deve ver a página de boas-vindas do Laravel. Para parar o servidor, pressione <code>Ctrl+C</code>.</p>
 
   <div class="callout callout--tip">
     <p class="callout-label">Dica</p>
-    <p>Existe um caminho alternativo com o instalador global (<code>composer global require laravel/installer</code> e depois <code>laravel new bookshelf-api</code>). Os dois chegam ao mesmo lugar — neste curso ficamos com o <code>create-project</code>.</p>
+    <p>Existe um caminho alternativo com o instalador global (<code>composer global require laravel/installer</code> e depois <code>laravel new src</code>). Os dois chegam ao mesmo lugar — neste curso ficamos com o <code>create-project</code>.</p>
   </div>
 
-  <h3>Mão na massa: configurando o banco no <code>.env</code></h3>
-  <p>Na raiz do projeto existe um arquivo chamado <code>.env</code>. Ele guarda as configurações que mudam de máquina para máquina (credenciais de banco, URLs, chaves) — por isso ele nunca vai para o controle de versão. Por padrão o Laravel 12 vem configurado para SQLite; vamos trocar para MySQL.</p>
-  <p>Primeiro, crie o banco de dados (você precisa de um MySQL rodando na máquina — se não tiver, o Passo 2 mostra como subir um com Docker):</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal</figcaption>
-    <pre><code>mysql -u root -p -e "CREATE DATABASE bookshelf;"</code></pre>
-  </figure>
-
-  <p>Depois, localize as linhas <code>DB_*</code> no <code>.env</code> e deixe-as assim (substituindo a senha pela sua):</p>
-
-  <figure class="code code--file">
-    <figcaption>.env</figcaption>
-    <pre><code>DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=bookshelf
-DB_USERNAME=root
-DB_PASSWORD=your_password</code></pre>
-  </figure>
-
-  <p>Com o banco configurado, rode as <em>migrations</em> padrão do Laravel — elas criam tabelas internas do framework (usuários, cache, filas). No Passo 5 você vai entender migrations a fundo; por enquanto, execute:</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal</figcaption>
-    <pre><code>php artisan migrate</code></pre>
-  </figure>
-
-  <h3>Mão na massa: habilitando as rotas de API</h3>
-  <p>No Laravel 11/12, o arquivo de rotas de API (<code>routes/api.php</code>) <strong>não vem por padrão</strong>. Para criá-lo, rode:</p>
-
-  <figure class="code code--term">
-    <figcaption>Terminal</figcaption>
-    <pre><code>php artisan install:api</code></pre>
-  </figure>
-
-  <p>Se o comando perguntar se deve executar novas migrations, responda <strong>yes</strong>. A partir de agora, toda rota declarada em <code>routes/api.php</code> responde automaticamente sob o prefixo <code>/api</code>.</p>
-
-  <div class="callout callout--warn">
-    <p class="callout-label">Atenção</p>
-    <p>O <code>install:api</code> também instala o Laravel Sanctum, um pacote de autenticação. <strong>Não vamos usá-lo agora</strong> — nossa API é pública nesta etapa. Autenticação é assunto do próximo módulo; deixe o pacote quieto aí.</p>
-  </div>
+  <p>E o banco de dados? Ainda não conectamos nenhum — de propósito. No Passo 2 o MySQL sobe <strong>via Docker</strong>, e é lá que configuraremos o <code>.env</code> e rodaremos as primeiras migrations.</p>
 
   <div class="verify">
     <h4>Como verificar</h4>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p1-1"> <span><code>php -v</code> mostra PHP 8.4.x e <code>composer --version</code> responde sem erro.</span></label></li>
       <li><label><input type="checkbox" data-ck="p1-2"> <span>Com <code>php artisan serve</code> rodando, <code>http://localhost:8000</code> exibe a página de boas-vindas do Laravel.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p1-3"> <span><code>php artisan migrate</code> terminou sem erros e <code>php artisan migrate:status</code> lista as migrations como <em>Ran</em>.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p1-4"> <span>O arquivo <code>routes/api.php</code> existe no projeto.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p1-3"> <span>O projeto Laravel está dentro de <code>bookshelf-api/src/</code> (e não direto na raiz de <code>bookshelf-api/</code>).</span></label></li>
     </ul>
   </div>
 </section>
 
 <section class="step" id="passo-2">
-  <h2><span class="step-badge step-badge--alt">Passo 2 · Opcional</span> O mesmo projeto, agora com Docker</h2>
+  <h2><span class="step-badge">Passo 2</span> Ambiente com Docker</h2>
 
-  <div class="callout callout--tip">
-    <p class="callout-label">Dica</p>
-    <p>Este passo é <strong>opcional</strong>. Se o Passo 1 funcionou na sua máquina, você pode pular direto para o <a href="#passo-3">Passo 3</a>. Volte aqui se quiser um ambiente idêntico ao de qualquer colega — ou se não quiser instalar MySQL localmente.</p>
+  <div class="callout callout--warn">
+    <p class="callout-label">Atenção</p>
+    <p>Este passo é <strong>obrigatório</strong>. Neste curso, o MySQL sobe <strong>exclusivamente via Docker</strong> — não vamos instalar nem configurar MySQL direto na máquina. Já o PHP você pode continuar rodando localmente para desenvolver (como no Passo 1); o container PHP existe para garantir um ambiente idêntico ao dos colegas e para preparar o caminho da produção.</p>
   </div>
 
   <h3>Conceito: por que Docker?</h3>
   <p>Docker executa aplicações em <strong>containers</strong>: pacotes isolados que carregam o programa e tudo de que ele precisa (versão exata do PHP, extensões, MySQL). O clássico "na minha máquina funciona" desaparece, porque a máquina passa a ser a mesma para todo mundo.</p>
   <p>Nossa arquitetura terá <strong>dois serviços na mesma rede Docker</strong>:</p>
   <ul>
-    <li><strong>php</strong> — PHP 8.4 com a aplicação Laravel, expondo a porta <code>8000</code>;</li>
-    <li><strong>mysql</strong> — o banco <code>bookshelf</code>, na porta <code>3306</code>.</li>
+    <li><strong>mysql</strong> — o banco <code>bookshelf</code>, na porta <code>3306</code>. É o único jeito de ter MySQL neste curso;</li>
+    <li><strong>php</strong> — PHP 8.4 com a aplicação Laravel, expondo a porta <code>8000</code>. Em desenvolvimento, você pode usar este container <em>ou</em> o PHP local da sua máquina.</li>
   </ul>
-  <p>Detalhe importante: dentro da rede Docker, o container PHP enxerga o banco pelo <em>hostname do serviço</em>. Ou seja, no <code>.env</code> o <code>DB_HOST</code> deixa de ser <code>127.0.0.1</code> e vira <code>mysql</code>.</p>
+  <p>Detalhe importante: dentro da rede Docker, o container PHP enxerga o banco pelo <em>hostname do serviço</em>. Ou seja, no <code>.env</code> o <code>DB_HOST</code> deixa de ser <code>127.0.0.1</code> e vira <code>mysql</code>. Já o PHP rodando na sua máquina continua enxergando o banco por <code>127.0.0.1</code>, porque o compose publica a porta <code>3306</code> para fora do container.</p>
 
-  <h3>Mão na massa: o projeto na pasta <code>src/</code></h3>
-  <p>Para separar o código da aplicação dos arquivos de infraestrutura (Dockerfile, compose.yaml), crie o projeto dentro de <code>src/</code>:</p>
+  <h3>Conceito: uma imagem para desenvolver, outra para publicar</h3>
+  <p>O container PHP terá <strong>dois Dockerfiles</strong>, porque desenvolvimento e produção pedem coisas diferentes:</p>
+  <ul>
+    <li><strong><code>Dockerfile.dev</code></strong> — a imagem de desenvolvimento: instala <em>todas</em> as dependências (inclusive as de teste, como o PHPUnit) e serve a aplicação com o <code>artisan serve</code>, recarregando o código a cada requisição;</li>
+    <li><strong><code>Dockerfile</code></strong> — a imagem de produção: instala só as dependências de runtime (<code>--no-dev</code>), otimiza o autoloader e habilita o <strong>OPcache</strong>, que guarda o PHP compilado em memória.</li>
+  </ul>
+  <p>É uma convenção comum: o <code>Dockerfile</code> "sem sobrenome" é o de produção — é ele que pipelines de deploy procuram por padrão — e as variantes ganham sufixo (<code>.dev</code>).</p>
 
-  <figure class="code code--term">
-    <figcaption>Terminal</figcaption>
-    <pre><code>mkdir bookshelf-api
-cd bookshelf-api
-composer create-project laravel/laravel src "12.*"</code></pre>
-  </figure>
-
-  <p>Se aparecer um erro de conexão com banco no final do <code>create-project</code>, ignore por enquanto — o MySQL ainda vai subir via Docker.</p>
-
-  <h3>Mão na massa: Dockerfile</h3>
-  <p>Na raiz de <code>bookshelf-api/</code> (ao lado de <code>src/</code>), crie o arquivo <code>Dockerfile</code>:</p>
+  <h3>Mão na massa: Dockerfile.dev</h3>
+  <p>Na raiz de <code>bookshelf-api/</code> (ao lado de <code>src/</code>), crie o arquivo <code>Dockerfile.dev</code>:</p>
 
   <figure class="code code--file">
-    <figcaption>Dockerfile</figcaption>
+    <figcaption>Dockerfile.dev</figcaption>
     <pre><code>FROM php:8.4-cli-trixie
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
@@ -453,8 +411,42 @@ CMD ["php", "artisan", "serve", "--host=0.0.0.0"]</code></pre>
     <p>A imagem oficial do PHP já vem com <code>curl</code>, <code>xml</code> e <code>mbstring</code> habilitados — só precisamos instalar <code>pdo_mysql</code>, <code>zip</code> e <code>bcmath</code>. E o <code>--host=0.0.0.0</code> é obrigatório: sem ele, o <code>artisan serve</code> não aceita conexões vindas de fora do container.</p>
   </div>
 
+  <h3>Mão na massa: Dockerfile (produção)</h3>
+  <p>Agora crie o <code>Dockerfile</code> de produção, também na raiz. A estrutura é a mesma; as diferenças estão marcadas com comentários:</p>
+
+  <figure class="code code--file">
+    <figcaption>Dockerfile</figcaption>
+    <pre><code>FROM php:8.4-cli-trixie
+
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+# opcache: keeps compiled PHP in memory between requests
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
+        libzip-dev \
+    &amp;&amp; docker-php-ext-install pdo_mysql zip bcmath opcache \
+    &amp;&amp; apt-get clean &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY src/ .
+
+# no dev dependencies (phpunit etc.) and an optimized class map
+RUN composer install --no-dev --optimize-autoloader
+
+EXPOSE 8000
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0"]</code></pre>
+  </figure>
+
+  <p>Você não vai usar este arquivo durante o curso — o dia a dia é com o <code>Dockerfile.dev</code> — mas ele fica pronto para o deploy do projeto final. Para construí-lo manualmente um dia: <code>docker build -t bookshelf-api .</code> (sem <code>-f</code>, o Docker usa o <code>Dockerfile</code> por padrão).</p>
+
+  <div class="callout callout--tip">
+    <p class="callout-label">Dica</p>
+    <p>Em produção de verdade, o <code>artisan serve</code> daria lugar a um servidor de aplicação (PHP-FPM atrás de um nginx, FrankenPHP…). Isso é assunto para o módulo de deploy — aqui o que importa é o hábito: <strong>imagem de dev e imagem de produção são coisas separadas desde o primeiro dia</strong>.</p>
+  </div>
+
   <h3>Mão na massa: .dockerignore</h3>
-  <p>Antes de construir a imagem, crie também um <code>.dockerignore</code> na raiz, ao lado do <code>Dockerfile</code>. Ele é o "<code>.gitignore</code> do build": o que estiver listado nem chega ao Docker. Dois motivos para não pular esta parte: o <code>.env</code> guarda segredos, e tudo o que o <code>COPY</code> leva fica <strong>gravado nas camadas da imagem</strong>; e o <code>vendor/</code> da sua máquina só engordaria o build à toa — o <code>composer install</code> do Dockerfile o reconstrói do zero:</p>
+  <p>Antes de construir qualquer imagem, crie também um <code>.dockerignore</code> na raiz, ao lado dos Dockerfiles (ele vale para os dois). Ele é o "<code>.gitignore</code> do build": o que estiver listado nem chega ao Docker. Dois motivos para não pular esta parte: o <code>.env</code> guarda segredos, e tudo o que o <code>COPY</code> leva fica <strong>gravado nas camadas da imagem</strong>; e o <code>vendor/</code> da sua máquina só engordaria o build à toa — o <code>composer install</code> do Dockerfile o reconstrói do zero:</p>
 
   <figure class="code code--file">
     <figcaption>.dockerignore</figcaption>
@@ -487,7 +479,9 @@ src/.env
       retries: 10
 
   php:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "8000:8000"
     volumes:
@@ -499,7 +493,7 @@ volumes:
 
   <div class="callout callout--tip">
     <p class="callout-label">Boas práticas aplicadas</p>
-    <p><strong>Versão fixa da imagem</strong> (<code>mysql:8.4</code> em vez de <code>latest</code>) e <strong>healthcheck</strong>: sem ele, o <code>depends_on</code> só espera o container <em>iniciar</em> — e comandos como <code>migrate</code> podem falhar na primeira subida porque o MySQL ainda não estava pronto de verdade. Repare também no ping via <code>127.0.0.1</code> com <code>--protocol=tcp</code>, e não <code>localhost</code>: durante a inicialização, a imagem do MySQL sobe um servidor temporário que responde apenas pelo socket local — pingar por TCP garante que "healthy" significa "aceitando conexões de verdade".</p>
+    <p><strong>Build apontando para o <code>Dockerfile.dev</code></strong>: o compose é a ferramenta do dia a dia de desenvolvimento, então constrói a imagem de dev — o <code>Dockerfile</code> de produção fica reservado para o deploy. <strong>Versão fixa da imagem</strong> (<code>mysql:8.4</code> em vez de <code>latest</code>) e <strong>healthcheck</strong>: sem ele, o <code>depends_on</code> só espera o container <em>iniciar</em> — e comandos como <code>migrate</code> podem falhar na primeira subida porque o MySQL ainda não estava pronto de verdade. Repare também no ping via <code>127.0.0.1</code> com <code>--protocol=tcp</code>, e não <code>localhost</code>: durante a inicialização, a imagem do MySQL sobe um servidor temporário que responde apenas pelo socket local — pingar por TCP garante que "healthy" significa "aceitando conexões de verdade".</p>
   </div>
 
   <div class="callout callout--warn">
@@ -507,8 +501,10 @@ volumes:
     <p>O bind mount <code>./src:/app</code> sobrepõe o que foi copiado na imagem, inclusive o <code>vendor/</code> gerado pelo <code>composer install</code> do Dockerfile. Em desenvolvimento, rode <code>composer install</code> dentro de <code>src/</code> na sua máquina, ou dentro do container: <code>docker compose exec php composer install</code>.</p>
   </div>
 
-  <h3>Mão na massa: <code>.env</code> — local vs. container</h3>
-  <p>Edite o <code>src/.env</code>. Em relação ao Passo 1 mudam duas coisas: as <strong>credenciais</strong> — agora usamos o usuário <code>bookshelf</code> que o compose criou, e não mais o <code>root</code> — e, se o PHP estiver rodando dentro do container, também o <code>DB_HOST</code>:</p>
+  <h3>Mão na massa: configurando o banco no <code>src/.env</code></h3>
+  <p>Na raiz do projeto Laravel (<code>src/</code>) existe um arquivo chamado <code>.env</code>. Ele guarda as configurações que mudam de máquina para máquina (credenciais de banco, URLs, chaves) — por isso ele nunca vai para o controle de versão. Por padrão o Laravel 12 vem configurado para SQLite; vamos trocar para o MySQL do Docker, usando o usuário <code>bookshelf</code> que o compose cria.</p>
+  <p>Repare que <strong>não há nenhum <code>CREATE DATABASE</code> manual</strong>: o container do MySQL já nasce com o banco e o usuário prontos, definidos pelas variáveis de ambiente do <code>compose.yaml</code>.</p>
+  <p>Edite o <code>src/.env</code> e deixe as linhas <code>DB_*</code> conforme o modo em que o seu PHP roda:</p>
 
   <figure class="code code--file">
     <figcaption>src/.env</figcaption>
@@ -532,6 +528,21 @@ DB_PASSWORD=bookshelf</code></pre>
   <p>Use apenas <strong>um</strong> dos blocos. Dentro da rede Docker, o hostname é o nome do serviço (<code>mysql</code>); da sua máquina, é <code>127.0.0.1</code>.</p>
 
   <h3>Mão na massa: subindo o ambiente</h3>
+  <p>Escolha o seu modo de desenvolvimento — os dois são válidos, e o MySQL vem do Docker nos dois:</p>
+
+  <p><strong>Modo A — PHP local + MySQL no Docker</strong> (bom para o dia a dia de desenvolvimento):</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal</figcaption>
+    <pre><code>docker compose up -d mysql
+
+# from inside src/, run the default migrations and enable API routes
+cd src
+php artisan migrate
+php artisan install:api</code></pre>
+  </figure>
+
+  <p><strong>Modo B — tudo no Docker</strong> (PHP e MySQL em containers):</p>
 
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
@@ -542,19 +553,26 @@ docker compose exec php php artisan migrate
 docker compose exec php php artisan install:api</code></pre>
   </figure>
 
-  <p>O container do MySQL é criado com banco e usuário prontos (definidos pelas variáveis de ambiente do compose) — sem SQL manual. A rede Docker conecta PHP e MySQL automaticamente.</p>
+  <p>Sobre esses dois comandos do Artisan: o <code>migrate</code> roda as <em>migrations</em> padrão do Laravel, que criam tabelas internas do framework (usuários, cache, filas) — no Passo 5 você vai entender migrations a fundo. E o <code>install:api</code> cria o arquivo de rotas de API (<code>routes/api.php</code>), que no Laravel 11/12 <strong>não vem por padrão</strong>; se ele perguntar se deve executar novas migrations, responda <strong>yes</strong>. A partir daí, toda rota declarada em <code>routes/api.php</code> responde automaticamente sob o prefixo <code>/api</code>.</p>
+
+  <div class="callout callout--warn">
+    <p class="callout-label">Atenção</p>
+    <p>O <code>install:api</code> também instala o Laravel Sanctum, um pacote de autenticação. <strong>Não vamos usá-lo agora</strong> — nossa API é pública nesta etapa. Autenticação é assunto do próximo módulo; deixe o pacote quieto aí.</p>
+  </div>
 
   <div class="callout callout--tip">
     <p class="callout-label">Dica</p>
-    <p><strong>Quer só o MySQL no Docker?</strong> Rode <code>docker compose up -d mysql</code> e continue usando o PHP da sua máquina com <code>DB_HOST=127.0.0.1</code>. Nesse caso, daqui em diante execute os comandos <code>php artisan ...</code> normalmente. Se estiver com o PHP no container, prefixe-os com <code>docker compose exec php</code>.</p>
+    <p>Daqui em diante, o tutorial mostra os comandos na forma <code>php artisan ...</code> (Modo A). Se você estiver no Modo B, com o PHP no container, basta prefixá-los com <code>docker compose exec php</code>.</p>
   </div>
 
   <div class="verify">
     <h4>Como verificar</h4>
     <ul class="checklist">
-      <li><label><input type="checkbox" data-ck="p2-1"> <span><code>docker compose ps</code> mostra os serviços <code>mysql</code> (healthy) e <code>php</code> rodando.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-1"> <span><code>docker compose ps</code> mostra o serviço <code>mysql</code> como <em>healthy</em> (e o <code>php</code> rodando, se você estiver no Modo B).</span></label></li>
       <li><label><input type="checkbox" data-ck="p2-2"> <span><code>http://localhost:8000</code> exibe a página de boas-vindas do Laravel.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p2-3"> <span><code>docker compose exec php php artisan migrate</code> conecta no banco e roda sem erros.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-3"> <span><code>php artisan migrate</code> (ou <code>docker compose exec php php artisan migrate</code>) conecta no banco e roda sem erros — e <code>php artisan migrate:status</code> lista as migrations como <em>Ran</em>.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-4"> <span>O arquivo <code>src/routes/api.php</code> existe no projeto.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p2-5"> <span>Os arquivos <code>Dockerfile</code>, <code>Dockerfile.dev</code>, <code>.dockerignore</code> e <code>compose.yaml</code> estão na raiz de <code>bookshelf-api/</code>, ao lado de <code>src/</code>.</span></label></li>
     </ul>
   </div>
 </section>
@@ -568,6 +586,18 @@ docker compose exec php php artisan install:api</code></pre>
   <figure class="code code--file">
     <figcaption>Estrutura de pastas — bookshelf-api/</figcaption>
     <pre><code>bookshelf-api/
+├── Dockerfile              # production image (Passo 2)
+├── Dockerfile.dev          # development image (Passo 2)
+├── .dockerignore
+├── compose.yaml            # Docker services (Passo 2)
+└── src/                    # the Laravel application</code></pre>
+  </figure>
+
+  <p>E, dentro de <code>src/</code>, o esqueleto do Laravel:</p>
+
+  <figure class="code code--file">
+    <figcaption>Estrutura de pastas — bookshelf-api/src/</figcaption>
+    <pre><code>src/
 ├── app/
 │   ├── Http/
 │   │   └── Controllers/    # controllers (Passo 7)
@@ -622,7 +652,7 @@ docker compose exec php php artisan install:api</code></pre>
     })-&gt;create();</code></pre>
   </figure>
 
-  <p>Repare na linha <code>api: __DIR__.'/../routes/api.php'</code> — foi o <code>php artisan install:api</code> do Passo 1 que a adicionou. É por causa dela que as rotas desse arquivo ganham o prefixo <code>/api</code>.</p>
+  <p>Repare na linha <code>api: __DIR__.'/../routes/api.php'</code> — foi o <code>php artisan install:api</code> do Passo 2 que a adicionou. É por causa dela que as rotas desse arquivo ganham o prefixo <code>/api</code>.</p>
 
   <h3>Conceito: o ciclo de vida de uma requisição</h3>
   <p>O que acontece quando alguém chama a nossa futura rota <code>GET /api/genres</code>? Este trajeto vai se repetir em tudo o que fizermos, então grave-o:</p>
