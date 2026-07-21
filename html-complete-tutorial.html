@@ -1149,8 +1149,113 @@ class Book extends Model
 
   <div class="callout callout--tip">
     <p class="callout-label">Dica</p>
-    <p>Agora que os models existem, os seeders poderiam ser reescritos com <code>Genre::create([...])</code> e <code>Book::create([...])</code> — com timestamps automáticos. As duas formas são válidas; deixamos o <code>DB::table()</code> como está para você conhecer as duas.</p>
+    <p>Agora que os models existem, os seeders poderiam ser reescritos com <code>Genre::create([...])</code> e <code>Book::create([...])</code> — com timestamps automáticos. As duas formas são válidas; deixamos o <code>DB::table()</code> como está para você conhecer as duas. Abaixo, a título de comparação, o diff exato de cada arquivo.</p>
   </div>
+
+  <h3>Aprofundando: os seeders reescritos com Eloquent</h3>
+  <p>A troca é opcional — o resultado no banco é idêntico. Se você quiser fazê-la, este é o diff em relação aos seeders do Passo 5:</p>
+
+  <figure class="code code--php">
+    <figcaption>database/seeders/GenreSeeder.php</figcaption>
+    <pre><code>&lt;?php
+
+namespace Database\Seeders;
+
+<span class="diff-add">use App\Models\Genre;</span>
+use Illuminate\Database\Seeder;
+<span class="diff-del">use Illuminate\Support\Facades\DB;</span>
+
+class GenreSeeder extends Seeder
+{
+    public function run(): void
+    {
+<span class="diff-del">        $now = now();</span>
+<span class="diff-del"></span>
+        $genres = [
+            ['name' =&gt; 'Fantasy',         'description' =&gt; 'Magic, mythical creatures and epic quests.'],
+            ['name' =&gt; 'Science Fiction', 'description' =&gt; 'Futuristic technology, space travel and speculative worlds.'],
+            ['name' =&gt; 'Romance',         'description' =&gt; 'Stories centered on relationships and emotional journeys.'],
+            ['name' =&gt; 'Mystery',         'description' =&gt; 'Crimes, detectives and puzzles waiting to be solved.'],
+        ];
+
+        foreach ($genres as $genre) {
+<span class="diff-del">            DB::table('genres')-&gt;insert($genre + [</span>
+<span class="diff-del">                'created_at' =&gt; $now,</span>
+<span class="diff-del">                'updated_at' =&gt; $now,</span>
+<span class="diff-del">            ]);</span>
+<span class="diff-add">            Genre::create($genre);</span>
+        }
+    }
+}</code></pre>
+  </figure>
+
+  <figure class="code code--php">
+    <figcaption>database/seeders/BookSeeder.php</figcaption>
+    <pre><code>&lt;?php
+
+namespace Database\Seeders;
+
+<span class="diff-add">use App\Models\Book;</span>
+<span class="diff-add">use App\Models\Genre;</span>
+use Illuminate\Database\Seeder;
+<span class="diff-del">use Illuminate\Support\Facades\DB;</span>
+
+class BookSeeder extends Seeder
+{
+    public function run(): void
+    {
+<span class="diff-del">        $now = now();</span>
+<span class="diff-del">        $genreIds = DB::table('genres')-&gt;pluck('id', 'name');</span>
+<span class="diff-add">        $genreIds = Genre::pluck('id', 'name');</span>
+
+        $books = [
+            // Fantasy
+            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'The Hobbit', 'author' =&gt; 'J.R.R. Tolkien', 'pages' =&gt; 310, 'status' =&gt; 'finished', 'rating' =&gt; 5],
+            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'A Game of Thrones', 'author' =&gt; 'George R.R. Martin', 'pages' =&gt; 694, 'status' =&gt; 'reading', 'rating' =&gt; null],
+            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'The Name of the Wind', 'author' =&gt; 'Patrick Rothfuss', 'pages' =&gt; 662, 'status' =&gt; 'to_read', 'rating' =&gt; null],
+
+            // Science Fiction
+            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'Dune', 'author' =&gt; 'Frank Herbert', 'pages' =&gt; 412, 'status' =&gt; 'finished', 'rating' =&gt; 5],
+            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'The Martian', 'author' =&gt; 'Andy Weir', 'pages' =&gt; 369, 'status' =&gt; 'finished', 'rating' =&gt; 4],
+            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'Neuromancer', 'author' =&gt; 'William Gibson', 'pages' =&gt; 271, 'status' =&gt; 'to_read', 'rating' =&gt; null],
+
+            // Romance
+            ['genre' =&gt; 'Romance', 'title' =&gt; 'Pride and Prejudice', 'author' =&gt; 'Jane Austen', 'pages' =&gt; 279, 'status' =&gt; 'finished', 'rating' =&gt; 4],
+            ['genre' =&gt; 'Romance', 'title' =&gt; 'Me Before You', 'author' =&gt; 'Jojo Moyes', 'pages' =&gt; 369, 'status' =&gt; 'reading', 'rating' =&gt; null],
+            ['genre' =&gt; 'Romance', 'title' =&gt; 'The Notebook', 'author' =&gt; 'Nicholas Sparks', 'pages' =&gt; 214, 'status' =&gt; 'to_read', 'rating' =&gt; null],
+
+            // Mystery
+            ['genre' =&gt; 'Mystery', 'title' =&gt; 'And Then There Were None', 'author' =&gt; 'Agatha Christie', 'pages' =&gt; 272, 'status' =&gt; 'finished', 'rating' =&gt; 5],
+            ['genre' =&gt; 'Mystery', 'title' =&gt; 'The Girl with the Dragon Tattoo', 'author' =&gt; 'Stieg Larsson', 'pages' =&gt; 465, 'status' =&gt; 'finished', 'rating' =&gt; 4],
+            ['genre' =&gt; 'Mystery', 'title' =&gt; 'Gone Girl', 'author' =&gt; 'Gillian Flynn', 'pages' =&gt; 415, 'status' =&gt; 'reading', 'rating' =&gt; null],
+        ];
+
+        foreach ($books as $book) {
+<span class="diff-del">            DB::table('books')-&gt;insert([</span>
+<span class="diff-add">            Book::create([</span>
+                'genre_id'   =&gt; $genreIds[$book['genre']],
+                'title'      =&gt; $book['title'],
+                'author'     =&gt; $book['author'],
+                'pages'      =&gt; $book['pages'],
+                'status'     =&gt; $book['status'],
+                'rating'     =&gt; $book['rating'],
+<span class="diff-del">                'created_at' =&gt; $now,</span>
+<span class="diff-del">                'updated_at' =&gt; $now,</span>
+            ]);
+        }
+    }
+}</code></pre>
+  </figure>
+
+  <p>Repare no que mudou — e no que <em>deixou</em> de existir:</p>
+  <ul>
+    <li><code>Genre::create($genre)</code> e <code>Book::create([...])</code> passam pela <em>atribuição em massa</em> que acabamos de estudar: só as colunas do <code>$fillable</code> são preenchidas. É por isso que esta versão só funciona <strong>depois</strong> do Passo 6 — sem o <code>$fillable</code>, o Eloquent lançaria <code>MassAssignmentException</code>;</li>
+    <li>o <code>$now</code> e os campos <code>created_at</code>/<code>updated_at</code> sumiram: o Eloquent preenche os timestamps sozinho a cada <code>create()</code>;</li>
+    <li><code>Genre::pluck('id', 'name')</code> faz a mesma consulta de antes, mas sem citar o nome da tabela — o model já sabe, pela convenção, que fala com <code>genres</code>;</li>
+    <li>as listas de dados (<code>$genres</code> e <code>$books</code>) não mudaram em nada — a reescrita troca só a forma de <em>gravar</em>, não o quê.</li>
+  </ul>
+
+  <p>Para conferir na prática, rode <code>php artisan migrate:fresh --seed</code> após a troca: as contagens do tinker (4 gêneros, 12 livros) continuam exatamente as mesmas.</p>
 
   <div class="verify">
     <h4>Como verificar</h4>
