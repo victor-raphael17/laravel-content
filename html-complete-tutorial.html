@@ -111,6 +111,22 @@ h2 code, h3 code { font-size: .8em; }
   overflow-x: auto; font-size: .84rem; line-height: 1.6;
 }
 .code pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; white-space: pre; }
+.code pre .diff-add,
+.code pre .diff-del {
+  display: inline-block;
+  min-width: calc(100% + 36px);
+  margin: 0 -18px;
+  padding: 0 18px;
+  position: relative;
+}
+.code pre .diff-add { background: rgba(63, 185, 80, .15); }
+.code pre .diff-del { background: rgba(248, 81, 73, .14); }
+.code pre .diff-add::before,
+.code pre .diff-del::before { position: absolute; left: 6px; font-weight: 600; }
+.code pre .diff-add::before { content: "+"; color: #3fb950; }
+.code pre .diff-del::before { content: "\2212"; color: #f85149; }
+.code pre .diff-add:empty::after,
+.code pre .diff-del:empty::after { content: "\00a0"; }
 .code-copy {
   margin-left: auto; flex: 0 0 auto;
   display: inline-flex; align-items: center; gap: 6px;
@@ -174,6 +190,9 @@ ol.flow li { margin: .45em 0; }
 .dot--term { background: #3fb950; }
 .dot--php { background: #58a6ff; }
 .dot--file { background: #d29922; }
+.dot--add { background: #3fb950; }
+.dot--del { background: #f85149; }
+.dot--ctx { background: #6e7681; }
 footer.end {
   margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line);
   color: var(--ink-soft); font-size: .85rem;
@@ -267,6 +286,13 @@ footer.end {
     <li><span class="dot dot--term"></span> <strong>Verde</strong> — comandos de terminal (shell).</li>
     <li><span class="dot dot--php"></span> <strong>Azul</strong> — código PHP (o cabeçalho mostra o caminho do arquivo).</li>
     <li><span class="dot dot--file"></span> <strong>Âmbar</strong> — arquivos de configuração (<code>.env</code>, YAML, Dockerfile) e estruturas de pastas.</li>
+  </ul>
+
+  <p>Além disso, quando um bloco mostra um arquivo <strong>que já existe</strong> sendo editado — em geral, um esqueleto gerado por <code>php artisan make:...</code> —, as linhas são marcadas como num <em>diff</em> do Git/GitHub:</p>
+  <ul class="legend">
+    <li><span class="dot dot--add"></span> <strong>Fundo verde com <code>+</code></strong> — linha nova ou alterada: é o que você escreve no arquivo.</li>
+    <li><span class="dot dot--del"></span> <strong>Fundo vermelho com <code>−</code></strong> — linha que existia no arquivo e deve ser removida (o botão "Copiar" já a ignora).</li>
+    <li><span class="dot dot--ctx"></span> <strong>Sem destaque</strong> — linha que já estava no arquivo: mantenha como está.</li>
   </ul>
 
   <p>Uma escolha deliberada: os <strong>comentários dentro dos blocos de código</strong> estão em inglês. É a convenção dominante na indústria — e vale a pena se acostumar com ela desde o primeiro dia.</p>
@@ -646,7 +672,7 @@ docker compose exec php php artisan install:api</code></pre>
     <pre><code>return Application::configure(basePath: dirname(__DIR__))
     -&gt;withRouting(
         web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
+<span class="diff-add">        api: __DIR__.'/../routes/api.php',</span>
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -808,12 +834,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('genres', function (Blueprint $table) {
-            $table-&gt;id();
-            $table-&gt;string('name');
-            $table-&gt;text('description')-&gt;nullable();
-            $table-&gt;timestamps();
-        });
+<span class="diff-add">        Schema::create('genres', function (Blueprint $table) {</span>
+<span class="diff-add">            $table-&gt;id();</span>
+<span class="diff-add">            $table-&gt;string('name');</span>
+<span class="diff-add">            $table-&gt;text('description')-&gt;nullable();</span>
+<span class="diff-add">            $table-&gt;timestamps();</span>
+<span class="diff-add">        });</span>
     }
 
     public function down(): void
@@ -835,16 +861,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('books', function (Blueprint $table) {
-            $table-&gt;id();
-            $table-&gt;foreignId('genre_id')-&gt;constrained()-&gt;cascadeOnDelete();
-            $table-&gt;string('title');
-            $table-&gt;string('author');
-            $table-&gt;integer('pages')-&gt;nullable();
-            $table-&gt;enum('status', ['to_read', 'reading', 'finished'])-&gt;default('to_read');
-            $table-&gt;unsignedTinyInteger('rating')-&gt;nullable();
-            $table-&gt;timestamps();
-        });
+<span class="diff-add">        Schema::create('books', function (Blueprint $table) {</span>
+<span class="diff-add">            $table-&gt;id();</span>
+<span class="diff-add">            $table-&gt;foreignId('genre_id')-&gt;constrained()-&gt;cascadeOnDelete();</span>
+<span class="diff-add">            $table-&gt;string('title');</span>
+<span class="diff-add">            $table-&gt;string('author');</span>
+<span class="diff-add">            $table-&gt;integer('pages')-&gt;nullable();</span>
+<span class="diff-add">            $table-&gt;enum('status', ['to_read', 'reading', 'finished'])-&gt;default('to_read');</span>
+<span class="diff-add">            $table-&gt;unsignedTinyInteger('rating')-&gt;nullable();</span>
+<span class="diff-add">            $table-&gt;timestamps();</span>
+<span class="diff-add">        });</span>
     }
 
     public function down(): void
@@ -889,27 +915,27 @@ php artisan make:seeder BookSeeder</code></pre>
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+<span class="diff-add">use Illuminate\Support\Facades\DB;</span>
 
 class GenreSeeder extends Seeder
 {
     public function run(): void
     {
-        $now = now();
-
-        $genres = [
-            ['name' =&gt; 'Fantasy',         'description' =&gt; 'Magic, mythical creatures and epic quests.'],
-            ['name' =&gt; 'Science Fiction', 'description' =&gt; 'Futuristic technology, space travel and speculative worlds.'],
-            ['name' =&gt; 'Romance',         'description' =&gt; 'Stories centered on relationships and emotional journeys.'],
-            ['name' =&gt; 'Mystery',         'description' =&gt; 'Crimes, detectives and puzzles waiting to be solved.'],
-        ];
-
-        foreach ($genres as $genre) {
-            DB::table('genres')-&gt;insert($genre + [
-                'created_at' =&gt; $now,
-                'updated_at' =&gt; $now,
-            ]);
-        }
+<span class="diff-add">        $now = now();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        $genres = [</span>
+<span class="diff-add">            ['name' =&gt; 'Fantasy',         'description' =&gt; 'Magic, mythical creatures and epic quests.'],</span>
+<span class="diff-add">            ['name' =&gt; 'Science Fiction', 'description' =&gt; 'Futuristic technology, space travel and speculative worlds.'],</span>
+<span class="diff-add">            ['name' =&gt; 'Romance',         'description' =&gt; 'Stories centered on relationships and emotional journeys.'],</span>
+<span class="diff-add">            ['name' =&gt; 'Mystery',         'description' =&gt; 'Crimes, detectives and puzzles waiting to be solved.'],</span>
+<span class="diff-add">        ];</span>
+<span class="diff-add"></span>
+<span class="diff-add">        foreach ($genres as $genre) {</span>
+<span class="diff-add">            DB::table('genres')-&gt;insert($genre + [</span>
+<span class="diff-add">                'created_at' =&gt; $now,</span>
+<span class="diff-add">                'updated_at' =&gt; $now,</span>
+<span class="diff-add">            ]);</span>
+<span class="diff-add">        }</span>
     }
 }</code></pre>
   </figure>
@@ -921,49 +947,49 @@ class GenreSeeder extends Seeder
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+<span class="diff-add">use Illuminate\Support\Facades\DB;</span>
 
 class BookSeeder extends Seeder
 {
     public function run(): void
     {
-        $now = now();
-        $genreIds = DB::table('genres')-&gt;pluck('id', 'name');
-
-        $books = [
-            // Fantasy
-            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'The Hobbit', 'author' =&gt; 'J.R.R. Tolkien', 'pages' =&gt; 310, 'status' =&gt; 'finished', 'rating' =&gt; 5],
-            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'A Game of Thrones', 'author' =&gt; 'George R.R. Martin', 'pages' =&gt; 694, 'status' =&gt; 'reading', 'rating' =&gt; null],
-            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'The Name of the Wind', 'author' =&gt; 'Patrick Rothfuss', 'pages' =&gt; 662, 'status' =&gt; 'to_read', 'rating' =&gt; null],
-
-            // Science Fiction
-            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'Dune', 'author' =&gt; 'Frank Herbert', 'pages' =&gt; 412, 'status' =&gt; 'finished', 'rating' =&gt; 5],
-            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'The Martian', 'author' =&gt; 'Andy Weir', 'pages' =&gt; 369, 'status' =&gt; 'finished', 'rating' =&gt; 4],
-            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'Neuromancer', 'author' =&gt; 'William Gibson', 'pages' =&gt; 271, 'status' =&gt; 'to_read', 'rating' =&gt; null],
-
-            // Romance
-            ['genre' =&gt; 'Romance', 'title' =&gt; 'Pride and Prejudice', 'author' =&gt; 'Jane Austen', 'pages' =&gt; 279, 'status' =&gt; 'finished', 'rating' =&gt; 4],
-            ['genre' =&gt; 'Romance', 'title' =&gt; 'Me Before You', 'author' =&gt; 'Jojo Moyes', 'pages' =&gt; 369, 'status' =&gt; 'reading', 'rating' =&gt; null],
-            ['genre' =&gt; 'Romance', 'title' =&gt; 'The Notebook', 'author' =&gt; 'Nicholas Sparks', 'pages' =&gt; 214, 'status' =&gt; 'to_read', 'rating' =&gt; null],
-
-            // Mystery
-            ['genre' =&gt; 'Mystery', 'title' =&gt; 'And Then There Were None', 'author' =&gt; 'Agatha Christie', 'pages' =&gt; 272, 'status' =&gt; 'finished', 'rating' =&gt; 5],
-            ['genre' =&gt; 'Mystery', 'title' =&gt; 'The Girl with the Dragon Tattoo', 'author' =&gt; 'Stieg Larsson', 'pages' =&gt; 465, 'status' =&gt; 'finished', 'rating' =&gt; 4],
-            ['genre' =&gt; 'Mystery', 'title' =&gt; 'Gone Girl', 'author' =&gt; 'Gillian Flynn', 'pages' =&gt; 415, 'status' =&gt; 'reading', 'rating' =&gt; null],
-        ];
-
-        foreach ($books as $book) {
-            DB::table('books')-&gt;insert([
-                'genre_id'   =&gt; $genreIds[$book['genre']],
-                'title'      =&gt; $book['title'],
-                'author'     =&gt; $book['author'],
-                'pages'      =&gt; $book['pages'],
-                'status'     =&gt; $book['status'],
-                'rating'     =&gt; $book['rating'],
-                'created_at' =&gt; $now,
-                'updated_at' =&gt; $now,
-            ]);
-        }
+<span class="diff-add">        $now = now();</span>
+<span class="diff-add">        $genreIds = DB::table('genres')-&gt;pluck('id', 'name');</span>
+<span class="diff-add"></span>
+<span class="diff-add">        $books = [</span>
+<span class="diff-add">            // Fantasy</span>
+<span class="diff-add">            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'The Hobbit', 'author' =&gt; 'J.R.R. Tolkien', 'pages' =&gt; 310, 'status' =&gt; 'finished', 'rating' =&gt; 5],</span>
+<span class="diff-add">            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'A Game of Thrones', 'author' =&gt; 'George R.R. Martin', 'pages' =&gt; 694, 'status' =&gt; 'reading', 'rating' =&gt; null],</span>
+<span class="diff-add">            ['genre' =&gt; 'Fantasy', 'title' =&gt; 'The Name of the Wind', 'author' =&gt; 'Patrick Rothfuss', 'pages' =&gt; 662, 'status' =&gt; 'to_read', 'rating' =&gt; null],</span>
+<span class="diff-add"></span>
+<span class="diff-add">            // Science Fiction</span>
+<span class="diff-add">            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'Dune', 'author' =&gt; 'Frank Herbert', 'pages' =&gt; 412, 'status' =&gt; 'finished', 'rating' =&gt; 5],</span>
+<span class="diff-add">            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'The Martian', 'author' =&gt; 'Andy Weir', 'pages' =&gt; 369, 'status' =&gt; 'finished', 'rating' =&gt; 4],</span>
+<span class="diff-add">            ['genre' =&gt; 'Science Fiction', 'title' =&gt; 'Neuromancer', 'author' =&gt; 'William Gibson', 'pages' =&gt; 271, 'status' =&gt; 'to_read', 'rating' =&gt; null],</span>
+<span class="diff-add"></span>
+<span class="diff-add">            // Romance</span>
+<span class="diff-add">            ['genre' =&gt; 'Romance', 'title' =&gt; 'Pride and Prejudice', 'author' =&gt; 'Jane Austen', 'pages' =&gt; 279, 'status' =&gt; 'finished', 'rating' =&gt; 4],</span>
+<span class="diff-add">            ['genre' =&gt; 'Romance', 'title' =&gt; 'Me Before You', 'author' =&gt; 'Jojo Moyes', 'pages' =&gt; 369, 'status' =&gt; 'reading', 'rating' =&gt; null],</span>
+<span class="diff-add">            ['genre' =&gt; 'Romance', 'title' =&gt; 'The Notebook', 'author' =&gt; 'Nicholas Sparks', 'pages' =&gt; 214, 'status' =&gt; 'to_read', 'rating' =&gt; null],</span>
+<span class="diff-add"></span>
+<span class="diff-add">            // Mystery</span>
+<span class="diff-add">            ['genre' =&gt; 'Mystery', 'title' =&gt; 'And Then There Were None', 'author' =&gt; 'Agatha Christie', 'pages' =&gt; 272, 'status' =&gt; 'finished', 'rating' =&gt; 5],</span>
+<span class="diff-add">            ['genre' =&gt; 'Mystery', 'title' =&gt; 'The Girl with the Dragon Tattoo', 'author' =&gt; 'Stieg Larsson', 'pages' =&gt; 465, 'status' =&gt; 'finished', 'rating' =&gt; 4],</span>
+<span class="diff-add">            ['genre' =&gt; 'Mystery', 'title' =&gt; 'Gone Girl', 'author' =&gt; 'Gillian Flynn', 'pages' =&gt; 415, 'status' =&gt; 'reading', 'rating' =&gt; null],</span>
+<span class="diff-add">        ];</span>
+<span class="diff-add"></span>
+<span class="diff-add">        foreach ($books as $book) {</span>
+<span class="diff-add">            DB::table('books')-&gt;insert([</span>
+<span class="diff-add">                'genre_id'   =&gt; $genreIds[$book['genre']],</span>
+<span class="diff-add">                'title'      =&gt; $book['title'],</span>
+<span class="diff-add">                'author'     =&gt; $book['author'],</span>
+<span class="diff-add">                'pages'      =&gt; $book['pages'],</span>
+<span class="diff-add">                'status'     =&gt; $book['status'],</span>
+<span class="diff-add">                'rating'     =&gt; $book['rating'],</span>
+<span class="diff-add">                'created_at' =&gt; $now,</span>
+<span class="diff-add">                'updated_at' =&gt; $now,</span>
+<span class="diff-add">            ]);</span>
+<span class="diff-add">        }</span>
     }
 }</code></pre>
   </figure>
@@ -988,10 +1014,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this-&gt;call([
-            GenreSeeder::class,
-            BookSeeder::class,
-        ]);
+<span class="diff-add">        $this-&gt;call([</span>
+<span class="diff-add">            GenreSeeder::class,</span>
+<span class="diff-add">            BookSeeder::class,</span>
+<span class="diff-add">        ]);</span>
     }
 }</code></pre>
   </figure>
@@ -1055,21 +1081,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+<span class="diff-add">use Illuminate\Database\Eloquent\Relations\HasMany;</span>
 
 class Genre extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    public function books(): HasMany
-    {
-        return $this-&gt;hasMany(Book::class);
-    }
+<span class="diff-add"></span>
+<span class="diff-add">    protected $fillable = [</span>
+<span class="diff-add">        'name',</span>
+<span class="diff-add">        'description',</span>
+<span class="diff-add">    ];</span>
+<span class="diff-add"></span>
+<span class="diff-add">    public function books(): HasMany</span>
+<span class="diff-add">    {</span>
+<span class="diff-add">        return $this-&gt;hasMany(Book::class);</span>
+<span class="diff-add">    }</span>
 }</code></pre>
   </figure>
 
@@ -1081,25 +1107,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+<span class="diff-add">use Illuminate\Database\Eloquent\Relations\BelongsTo;</span>
 
 class Book extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'genre_id',
-        'title',
-        'author',
-        'pages',
-        'status',
-        'rating',
-    ];
-
-    public function genre(): BelongsTo
-    {
-        return $this-&gt;belongsTo(Genre::class);
-    }
+<span class="diff-add"></span>
+<span class="diff-add">    protected $fillable = [</span>
+<span class="diff-add">        'genre_id',</span>
+<span class="diff-add">        'title',</span>
+<span class="diff-add">        'author',</span>
+<span class="diff-add">        'pages',</span>
+<span class="diff-add">        'status',</span>
+<span class="diff-add">        'rating',</span>
+<span class="diff-add">    ];</span>
+<span class="diff-add"></span>
+<span class="diff-add">    public function genre(): BelongsTo</span>
+<span class="diff-add">    {</span>
+<span class="diff-add">        return $this-&gt;belongsTo(Genre::class);</span>
+<span class="diff-add">    }</span>
 }</code></pre>
   </figure>
 
@@ -1187,41 +1213,41 @@ php artisan make:controller Api/BookController --api</code></pre>
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Genre;
+<span class="diff-add">use App\Models\Genre;</span>
 use Illuminate\Http\Request;
 
 class GenreController extends Controller
 {
     public function index()
     {
-        return response()-&gt;json(Genre::all());
+<span class="diff-add">        return response()-&gt;json(Genre::all());</span>
     }
 
     public function store(Request $request)
     {
-        $genre = Genre::create($request-&gt;all());
-
-        return response()-&gt;json($genre, 201);
+<span class="diff-add">        $genre = Genre::create($request-&gt;all());</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($genre, 201);</span>
     }
 
-    public function show(int $id)
+<span class="diff-add">    public function show(int $id)</span>
     {
-        return response()-&gt;json(Genre::findOrFail($id));
+<span class="diff-add">        return response()-&gt;json(Genre::findOrFail($id));</span>
     }
 
-    public function update(Request $request, int $id)
+<span class="diff-add">    public function update(Request $request, int $id)</span>
     {
-        $genre = Genre::findOrFail($id);
-        $genre-&gt;update($request-&gt;all());
-
-        return response()-&gt;json($genre);
+<span class="diff-add">        $genre = Genre::findOrFail($id);</span>
+<span class="diff-add">        $genre-&gt;update($request-&gt;all());</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($genre);</span>
     }
 
-    public function destroy(int $id)
+<span class="diff-add">    public function destroy(int $id)</span>
     {
-        Genre::findOrFail($id)-&gt;delete();
-
-        return response()-&gt;noContent();
+<span class="diff-add">        Genre::findOrFail($id)-&gt;delete();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;noContent();</span>
     }
 }</code></pre>
   </figure>
@@ -1233,41 +1259,41 @@ class GenreController extends Controller
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Book;
+<span class="diff-add">use App\Models\Book;</span>
 use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
     public function index()
     {
-        return response()-&gt;json(Book::all());
+<span class="diff-add">        return response()-&gt;json(Book::all());</span>
     }
 
     public function store(Request $request)
     {
-        $book = Book::create($request-&gt;all());
-
-        return response()-&gt;json($book, 201);
+<span class="diff-add">        $book = Book::create($request-&gt;all());</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($book, 201);</span>
     }
 
-    public function show(int $id)
+<span class="diff-add">    public function show(int $id)</span>
     {
-        return response()-&gt;json(Book::findOrFail($id));
+<span class="diff-add">        return response()-&gt;json(Book::findOrFail($id));</span>
     }
 
-    public function update(Request $request, int $id)
+<span class="diff-add">    public function update(Request $request, int $id)</span>
     {
-        $book = Book::findOrFail($id);
-        $book-&gt;update($request-&gt;all());
-
-        return response()-&gt;json($book);
+<span class="diff-add">        $book = Book::findOrFail($id);</span>
+<span class="diff-add">        $book-&gt;update($request-&gt;all());</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;json($book);</span>
     }
 
-    public function destroy(int $id)
+<span class="diff-add">    public function destroy(int $id)</span>
     {
-        Book::findOrFail($id)-&gt;delete();
-
-        return response()-&gt;noContent();
+<span class="diff-add">        Book::findOrFail($id)-&gt;delete();</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return response()-&gt;noContent();</span>
     }
 }</code></pre>
   </figure>
@@ -1469,42 +1495,42 @@ class BookService
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\GenreService;
+<span class="diff-add">use App\Services\GenreService;</span>
 use Illuminate\Http\Request;
 
 class GenreController extends Controller
 {
-    public function __construct(
-        private GenreService $genreService
-    ) {}
-
+<span class="diff-add">    public function __construct(</span>
+<span class="diff-add">        private GenreService $genreService</span>
+<span class="diff-add">    ) {}</span>
+<span class="diff-add"></span>
     public function index()
     {
-        return response()-&gt;json($this-&gt;genreService-&gt;listAll());
+<span class="diff-add">        return response()-&gt;json($this-&gt;genreService-&gt;listAll());</span>
     }
 
     public function store(Request $request)
     {
-        $genre = $this-&gt;genreService-&gt;create($request-&gt;all());
+<span class="diff-add">        $genre = $this-&gt;genreService-&gt;create($request-&gt;all());</span>
 
         return response()-&gt;json($genre, 201);
     }
 
     public function show(int $id)
     {
-        return response()-&gt;json($this-&gt;genreService-&gt;findById($id));
+<span class="diff-add">        return response()-&gt;json($this-&gt;genreService-&gt;findById($id));</span>
     }
 
     public function update(Request $request, int $id)
     {
-        $genre = $this-&gt;genreService-&gt;update($id, $request-&gt;all());
+<span class="diff-add">        $genre = $this-&gt;genreService-&gt;update($id, $request-&gt;all());</span>
 
         return response()-&gt;json($genre);
     }
 
     public function destroy(int $id)
     {
-        $this-&gt;genreService-&gt;delete($id);
+<span class="diff-add">        $this-&gt;genreService-&gt;delete($id);</span>
 
         return response()-&gt;noContent();
     }
@@ -1518,42 +1544,42 @@ class GenreController extends Controller
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\BookService;
+<span class="diff-add">use App\Services\BookService;</span>
 use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-    public function __construct(
-        private BookService $bookService
-    ) {}
-
+<span class="diff-add">    public function __construct(</span>
+<span class="diff-add">        private BookService $bookService</span>
+<span class="diff-add">    ) {}</span>
+<span class="diff-add"></span>
     public function index()
     {
-        return response()-&gt;json($this-&gt;bookService-&gt;listAll());
+<span class="diff-add">        return response()-&gt;json($this-&gt;bookService-&gt;listAll());</span>
     }
 
     public function store(Request $request)
     {
-        $book = $this-&gt;bookService-&gt;create($request-&gt;all());
+<span class="diff-add">        $book = $this-&gt;bookService-&gt;create($request-&gt;all());</span>
 
         return response()-&gt;json($book, 201);
     }
 
     public function show(int $id)
     {
-        return response()-&gt;json($this-&gt;bookService-&gt;findById($id));
+<span class="diff-add">        return response()-&gt;json($this-&gt;bookService-&gt;findById($id));</span>
     }
 
     public function update(Request $request, int $id)
     {
-        $book = $this-&gt;bookService-&gt;update($id, $request-&gt;all());
+<span class="diff-add">        $book = $this-&gt;bookService-&gt;update($id, $request-&gt;all());</span>
 
         return response()-&gt;json($book);
     }
 
     public function destroy(int $id)
     {
-        $this-&gt;bookService-&gt;delete($id);
+<span class="diff-add">        $this-&gt;bookService-&gt;delete($id);</span>
 
         return response()-&gt;noContent();
     }
@@ -1611,14 +1637,15 @@ class StoreGenreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+<span class="diff-del">        return false;</span>
+<span class="diff-add">        return true;</span>
     }
 
     public function rules(): array
     {
         return [
-            'name'        =&gt; 'required|string|max:255',
-            'description' =&gt; 'nullable|string',
+<span class="diff-add">            'name'        =&gt; 'required|string|max:255',</span>
+<span class="diff-add">            'description' =&gt; 'nullable|string',</span>
         ];
     }
 }</code></pre>
@@ -1636,18 +1663,19 @@ class StoreBookRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+<span class="diff-del">        return false;</span>
+<span class="diff-add">        return true;</span>
     }
 
     public function rules(): array
     {
         return [
-            'genre_id' =&gt; 'required|integer|exists:genres,id',
-            'title'    =&gt; 'required|string|max:255',
-            'author'   =&gt; 'required|string|max:255',
-            'pages'    =&gt; 'nullable|integer|min:1',
-            'status'   =&gt; 'sometimes|in:to_read,reading,finished',
-            'rating'   =&gt; 'nullable|integer|min:1|max:5',
+<span class="diff-add">            'genre_id' =&gt; 'required|integer|exists:genres,id',</span>
+<span class="diff-add">            'title'    =&gt; 'required|string|max:255',</span>
+<span class="diff-add">            'author'   =&gt; 'required|string|max:255',</span>
+<span class="diff-add">            'pages'    =&gt; 'nullable|integer|min:1',</span>
+<span class="diff-add">            'status'   =&gt; 'sometimes|in:to_read,reading,finished',</span>
+<span class="diff-add">            'rating'   =&gt; 'nullable|integer|min:1|max:5',</span>
         ];
     }
 }</code></pre>
@@ -1707,13 +1735,14 @@ class GenreResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        return [
-            'id'          =&gt; $this-&gt;id,
-            'name'        =&gt; $this-&gt;name,
-            'description' =&gt; $this-&gt;description,
-            'created_at'  =&gt; $this-&gt;created_at,
-            'updated_at'  =&gt; $this-&gt;updated_at,
-        ];
+<span class="diff-del">        return parent::toArray($request);</span>
+<span class="diff-add">        return [</span>
+<span class="diff-add">            'id'          =&gt; $this-&gt;id,</span>
+<span class="diff-add">            'name'        =&gt; $this-&gt;name,</span>
+<span class="diff-add">            'description' =&gt; $this-&gt;description,</span>
+<span class="diff-add">            'created_at'  =&gt; $this-&gt;created_at,</span>
+<span class="diff-add">            'updated_at'  =&gt; $this-&gt;updated_at,</span>
+<span class="diff-add">        ];</span>
     }
 }</code></pre>
   </figure>
@@ -1731,17 +1760,18 @@ class BookResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        return [
-            'id'         =&gt; $this-&gt;id,
-            'title'      =&gt; $this-&gt;title,
-            'author'     =&gt; $this-&gt;author,
-            'pages'      =&gt; $this-&gt;pages,
-            'status'     =&gt; $this-&gt;status,
-            'rating'     =&gt; $this-&gt;rating,
-            'genre'      =&gt; new GenreResource($this-&gt;whenLoaded('genre')),
-            'created_at' =&gt; $this-&gt;created_at,
-            'updated_at' =&gt; $this-&gt;updated_at,
-        ];
+<span class="diff-del">        return parent::toArray($request);</span>
+<span class="diff-add">        return [</span>
+<span class="diff-add">            'id'         =&gt; $this-&gt;id,</span>
+<span class="diff-add">            'title'      =&gt; $this-&gt;title,</span>
+<span class="diff-add">            'author'     =&gt; $this-&gt;author,</span>
+<span class="diff-add">            'pages'      =&gt; $this-&gt;pages,</span>
+<span class="diff-add">            'status'     =&gt; $this-&gt;status,</span>
+<span class="diff-add">            'rating'     =&gt; $this-&gt;rating,</span>
+<span class="diff-add">            'genre'      =&gt; new GenreResource($this-&gt;whenLoaded('genre')),</span>
+<span class="diff-add">            'created_at' =&gt; $this-&gt;created_at,</span>
+<span class="diff-add">            'updated_at' =&gt; $this-&gt;updated_at,</span>
+<span class="diff-add">        ];</span>
     }
 }</code></pre>
   </figure>
@@ -1761,10 +1791,11 @@ class BookResource extends JsonResource
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreGenreRequest;
-use App\Http\Requests\UpdateGenreRequest;
-use App\Http\Resources\GenreResource;
+<span class="diff-add">use App\Http\Requests\StoreGenreRequest;</span>
+<span class="diff-add">use App\Http\Requests\UpdateGenreRequest;</span>
+<span class="diff-add">use App\Http\Resources\GenreResource;</span>
 use App\Services\GenreService;
+<span class="diff-del">use Illuminate\Http\Request;</span>
 
 class GenreController extends Controller
 {
@@ -1774,26 +1805,26 @@ class GenreController extends Controller
 
     public function index()
     {
-        return GenreResource::collection($this-&gt;genreService-&gt;listAll());
+<span class="diff-add">        return GenreResource::collection($this-&gt;genreService-&gt;listAll());</span>
     }
 
-    public function store(StoreGenreRequest $request)
+<span class="diff-add">    public function store(StoreGenreRequest $request)</span>
     {
-        $genre = $this-&gt;genreService-&gt;create($request-&gt;validated());
-
-        return (new GenreResource($genre))-&gt;response()-&gt;setStatusCode(201);
+<span class="diff-add">        $genre = $this-&gt;genreService-&gt;create($request-&gt;validated());</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return (new GenreResource($genre))-&gt;response()-&gt;setStatusCode(201);</span>
     }
 
     public function show(int $id)
     {
-        return new GenreResource($this-&gt;genreService-&gt;findById($id));
+<span class="diff-add">        return new GenreResource($this-&gt;genreService-&gt;findById($id));</span>
     }
 
-    public function update(UpdateGenreRequest $request, int $id)
+<span class="diff-add">    public function update(UpdateGenreRequest $request, int $id)</span>
     {
-        $genre = $this-&gt;genreService-&gt;update($id, $request-&gt;validated());
-
-        return new GenreResource($genre);
+<span class="diff-add">        $genre = $this-&gt;genreService-&gt;update($id, $request-&gt;validated());</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return new GenreResource($genre);</span>
     }
 
     public function destroy(int $id)
@@ -1812,10 +1843,11 @@ class GenreController extends Controller
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreBookRequest;
-use App\Http\Requests\UpdateBookRequest;
-use App\Http\Resources\BookResource;
+<span class="diff-add">use App\Http\Requests\StoreBookRequest;</span>
+<span class="diff-add">use App\Http\Requests\UpdateBookRequest;</span>
+<span class="diff-add">use App\Http\Resources\BookResource;</span>
 use App\Services\BookService;
+<span class="diff-del">use Illuminate\Http\Request;</span>
 
 class BookController extends Controller
 {
@@ -1825,26 +1857,26 @@ class BookController extends Controller
 
     public function index()
     {
-        return BookResource::collection($this-&gt;bookService-&gt;listAll());
+<span class="diff-add">        return BookResource::collection($this-&gt;bookService-&gt;listAll());</span>
     }
 
-    public function store(StoreBookRequest $request)
+<span class="diff-add">    public function store(StoreBookRequest $request)</span>
     {
-        $book = $this-&gt;bookService-&gt;create($request-&gt;validated());
-
-        return (new BookResource($book))-&gt;response()-&gt;setStatusCode(201);
+<span class="diff-add">        $book = $this-&gt;bookService-&gt;create($request-&gt;validated());</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return (new BookResource($book))-&gt;response()-&gt;setStatusCode(201);</span>
     }
 
     public function show(int $id)
     {
-        return new BookResource($this-&gt;bookService-&gt;findById($id));
+<span class="diff-add">        return new BookResource($this-&gt;bookService-&gt;findById($id));</span>
     }
 
-    public function update(UpdateBookRequest $request, int $id)
+<span class="diff-add">    public function update(UpdateBookRequest $request, int $id)</span>
     {
-        $book = $this-&gt;bookService-&gt;update($id, $request-&gt;validated());
-
-        return new BookResource($book);
+<span class="diff-add">        $book = $this-&gt;bookService-&gt;update($id, $request-&gt;validated());</span>
+<span class="diff-add"></span>
+<span class="diff-add">        return new BookResource($book);</span>
     }
 
     public function destroy(int $id)
@@ -2139,7 +2171,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('genres', GenreController::class);
 Route::apiResource('books', BookController::class);
-Route::get('genres/{id}/books', [GenreController::class, 'books'])-&gt;whereNumber('id');</code></pre>
+<span class="diff-add">Route::get('genres/{id}/books', [GenreController::class, 'books'])-&gt;whereNumber('id');</span></code></pre>
   </figure>
 
   <p>O <code>-&gt;whereNumber('id')</code> paga a promessa do Passo 7: o parâmetro só casa com dígitos, então um <code>GET /api/genres/abc/books</code> morre no roteador com <strong>404</strong> — nem chega ao controller.</p>
@@ -2320,7 +2352,14 @@ curl -i http://localhost:8000/api/genres/999/books -H 'Accept: application/json'
     var label = btn.querySelector('.code-copy-label');
     var resetTimer;
     btn.addEventListener('click', function () {
-      copyText(codeEl.textContent).then(function () {
+      // removed (diff-del) lines must not be part of the copied code
+      var clone = codeEl.cloneNode(true);
+      Array.prototype.forEach.call(clone.querySelectorAll('.diff-del'), function (el) {
+        var next = el.nextSibling;
+        if (next && next.nodeType === 3) { next.textContent = next.textContent.replace(/^\n/, ''); }
+        el.parentNode.removeChild(el);
+      });
+      copyText(clone.textContent).then(function () {
         btn.classList.add('is-copied');
         label.textContent = 'Copiado!';
         clearTimeout(resetTimer);
