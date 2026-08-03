@@ -35,7 +35,125 @@
   --m-del-ink: #b3261e;
   color-scheme: light;
 }
-html[data-theme="dark"] {
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1319;
+    --bg-soft: #161b24;
+    --ink: #e2e6ef;
+    --ink-soft: #99a3b6;
+    --line: #262d3a;
+    --accent: #f5502b;
+    --accent-dark: #ff8266;
+    --accent-soft: #3b1d13;
+    --green: #4ec583;
+    --green-soft: #142319;
+    --amber: #dcaa3d;
+    --blue: #6ab0f3;
+    --bg-hover: #202737;
+    --tip-border: #24503a;
+    --warn-bg: #251e0f;
+    --warn-border: #4c3c18;
+    --concept-bg: #131f2e;
+    --concept-border: #21405f;
+    --verify-bg: #121f19;
+    --verify-border: #2f6c48;
+    --m-get-bg: #152b44;
+    --m-post-bg: #153020;
+    --m-put-bg: #33280f;
+    --m-del-bg: #3a1817;
+    --m-del-ink: #f28b82;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1319;
+  --bg-soft: #161b24;
+  --ink: #e2e6ef;
+  --ink-soft: #99a3b6;
+  --line: #262d3a;
+  --accent: #f5502b;
+  --accent-dark: #ff8266;
+  --accent-soft: #3b1d13;
+  --green: #4ec583;
+  --green-soft: #142319;
+  --amber: #dcaa3d;
+  --blue: #6ab0f3;
+  --bg-hover: #202737;
+  --tip-border: #24503a;
+  --warn-bg: #251e0f;
+  --warn-border: #4c3c18;
+  --concept-bg: #131f2e;
+  --concept-border: #21405f;
+  --verify-bg: #121f19;
+  --verify-border: #2f6c48;
+  --m-get-bg: #152b44;
+  --m-post-bg: #153020;
+  --m-put-bg: #33280f;
+  --m-del-bg: #3a1817;
+  --m-del-ink: #f28b82;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-soft: #f6f7f9;
+  --ink: #22283a;
+  --ink-soft: #5b6478;
+  --line: #e3e6ec;
+  --accent: #f53003;
+  --accent-dark: #b52605;
+  --accent-soft: #fdeae4;
+  --green: #1a7f4b;
+  --green-soft: #f0faf4;
+  --amber: #9a6700;
+  --blue: #1861ab;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --bg-hover: #ececf1;
+  --tip-border: #bfe6cd;
+  --warn-bg: #fdf6ec;
+  --warn-border: #f0dcb8;
+  --concept-bg: #f0f6fd;
+  --concept-border: #c4dcf5;
+  --verify-bg: #f6fcf8;
+  --verify-border: #79c294;
+  --m-get-bg: #e7f3ff;
+  --m-post-bg: #e9f8ef;
+  --m-put-bg: #fdf3e2;
+  --m-del-bg: #fdeceb;
+  --m-del-ink: #b3261e;
+  color-scheme: light;
+}
+/* Escolha explícita do leitor no botão da barra lateral.
+   Declarada por último: vence tanto o prefers-color-scheme
+   quanto o data-theme aplicado pelo visualizador. */
+:root[data-user-theme="light"] {
+  --bg: #ffffff;
+  --bg-soft: #f6f7f9;
+  --ink: #22283a;
+  --ink-soft: #5b6478;
+  --line: #e3e6ec;
+  --accent: #f53003;
+  --accent-dark: #b52605;
+  --accent-soft: #fdeae4;
+  --green: #1a7f4b;
+  --green-soft: #f0faf4;
+  --amber: #9a6700;
+  --blue: #1861ab;
+  --bg-hover: #ececf1;
+  --tip-border: #bfe6cd;
+  --warn-bg: #fdf6ec;
+  --warn-border: #f0dcb8;
+  --concept-bg: #f0f6fd;
+  --concept-border: #c4dcf5;
+  --verify-bg: #f6fcf8;
+  --verify-border: #79c294;
+  --m-get-bg: #e7f3ff;
+  --m-post-bg: #e9f8ef;
+  --m-put-bg: #fdf3e2;
+  --m-del-bg: #fdeceb;
+  --m-del-ink: #b3261e;
+  color-scheme: light;
+}
+:root[data-user-theme="dark"] {
   --bg: #0f1319;
   --bg-soft: #161b24;
   --ink: #e2e6ef;
@@ -87,12 +205,33 @@ main:focus { outline: none; }
   background: var(--bg-soft);
   padding: 28px 18px 40px;
   position: sticky; top: 0;
-  height: 100vh; overflow-y: auto;
+  height: 100vh; overflow: hidden;
+  display: flex; flex-direction: column;
 }
+.sidebar-head { flex: 0 0 auto; }
 .brand { font-weight: 800; font-size: 1.08rem; margin: 0; letter-spacing: .2px; }
 .brand span { color: var(--accent); }
-.brand-sub { margin: 2px 0 20px; font-size: .8rem; color: var(--ink-soft); }
-.toc { list-style: none; margin: 0; padding: 0; }
+.brand-sub { margin: 2px 0 16px; font-size: .8rem; color: var(--ink-soft); }
+.theme-switch {
+  display: flex; gap: 4px; margin: 0 0 20px;
+  padding: 3px; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--bg);
+}
+.theme-switch button {
+  flex: 1 1 0; min-width: 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  font-family: inherit; font-size: .74rem; font-weight: 600; line-height: 1;
+  color: var(--ink-soft); background: transparent;
+  border: 0; border-radius: 6px; padding: 6px 4px; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.theme-switch button:hover { background: var(--bg-hover); color: var(--ink); }
+.theme-switch button[aria-pressed="true"] {
+  background: var(--accent-soft); color: var(--accent-dark);
+}
+.theme-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.theme-switch svg { width: 13px; height: 13px; flex: 0 0 auto; }
+.toc { list-style: none; margin: 0; padding: 0 4px 0 0; flex: 1 1 auto; overflow-y: auto; }
 .toc li { margin: 2px 0; }
 .toc a {
   display: block; padding: 7px 10px; border-radius: 8px;
@@ -210,6 +349,10 @@ h2 code, h3 code { font-size: .8em; }
 .checklist input { margin-top: 4px; accent-color: var(--green); flex: 0 0 auto; }
 .verify > p { font-size: .92rem; margin: 0 0 8px; }
 .verify .code { margin-top: 6px; }
+a:focus-visible,
+.toc a:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px;
+}
 .table-wrap { overflow-x: auto; margin: 1.25em 0; }
 table { border-collapse: collapse; width: 100%; font-size: .89rem; }
 th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
@@ -238,49 +381,54 @@ footer.end {
   margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line);
   color: var(--ink-soft); font-size: .85rem;
 }
-.theme-toggle {
-  position: fixed; top: 16px; right: 16px; z-index: 60;
-  width: 40px; height: 40px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg-soft); color: var(--ink-soft);
-  border: 1px solid var(--line); cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
-  transition: color .15s, background .15s, border-color .15s;
-}
-.theme-toggle:hover { color: var(--ink); background: var(--bg-hover); }
-.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.theme-toggle svg { width: 18px; height: 18px; flex: 0 0 auto; }
-.theme-toggle .icon-sun { display: none; }
-html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
-html[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 @media (max-width: 940px) {
   .layout { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+  .sidebar {
+    position: static; height: auto; overflow: visible; display: block;
+    border-right: none; border-bottom: 1px solid var(--line);
+  }
+  .toc { overflow-y: visible; }
+  .theme-switch { max-width: 280px; }
   main { padding: 30px 20px 90px; }
   h1 { font-size: 1.7rem; }
   code { white-space: normal; overflow-wrap: anywhere; }
 }
 </style>
 <script>
-// Apply the saved theme before first paint to avoid a light-theme flash
-try {
-  if (localStorage.getItem('bookshelf-tutorial:theme') === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  }
-} catch (e) {}
+// Aplica o tema salvo antes de a página pintar, para não piscar.
+(function () {
+  try {
+    var saved = localStorage.getItem('bookshelf-tutorial:theme');
+    if (saved === 'light' || saved === 'dark') {
+      document.documentElement.setAttribute('data-user-theme', saved);
+    }
+  } catch (e) {}
+})();
 </script>
 </head>
 <body>
 <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
-<button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Mudar para tema escuro">
-  <svg class="icon-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M13.5 9.7A5.6 5.6 0 0 1 6.3 2.5a5.6 5.6 0 1 0 7.2 7.2z"/></svg>
-  <svg class="icon-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.2v1.8M8 13v1.8M1.2 8H3M13 8h1.8M3.2 3.2l1.3 1.3M11.5 11.5l1.3 1.3M12.8 3.2l-1.3 1.3M4.5 11.5l-1.3 1.3"/></svg>
-</button>
 <div class="layout">
 
 <nav class="sidebar" aria-label="Sumário">
-  <p class="brand">BookShelf <span>API</span></p>
-  <p class="brand-sub">Laravel 12 do zero, passo a passo</p>
+  <div class="sidebar-head">
+    <p class="brand">BookShelf <span>API</span></p>
+    <p class="brand-sub">Laravel 12 do zero, passo a passo</p>
+    <div class="theme-switch" role="group" aria-label="Tema da página">
+      <button type="button" data-theme-set="auto" aria-pressed="true" title="Seguir o tema do sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Auto
+      </button>
+      <button type="button" data-theme-set="light" aria-pressed="false" title="Sempre claro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        Claro
+      </button>
+      <button type="button" data-theme-set="dark" aria-pressed="false" title="Sempre escuro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        Escuro
+      </button>
+    </div>
+  </div>
   <ol class="toc">
     <li><a href="#introducao">Introdução — o que vamos construir</a></li>
     <li><a href="#passo-1">Passo 1 — Instalação e primeiro projeto</a></li>
@@ -294,7 +442,7 @@ try {
     <li><a href="#passo-9">Passo 9 — Form Requests e API Resources</a></li>
     <li><a href="#passo-10">Passo 10 — PSRs e convenções de nomenclatura</a></li>
     <li><a href="#passo-11">Passo 11 — Testando a API de ponta a ponta</a></li>
-    <li><a href="#passo-12">Passo 12 — Bônus e próximos passos</a></li>
+    <li><a href="#passo-12">Passo 12 — Revisão final e próximos passos</a></li>
   </ol>
 </nav>
 
@@ -328,8 +476,6 @@ try {
       </tbody>
     </table>
   </div>
-
-  <p>E, de bônus, <code>GET /api/genres/{id}/books</code> para listar os livros de um gênero específico.</p>
 
   <p>Pelo caminho, você vai aprender os fundamentos do Laravel na ordem em que eles fazem sentido: instalação e ambiente, estrutura do projeto, arquitetura MVC, migrations e seeders, Eloquent ORM, controllers e rotas RESTful, a arquitetura Model-Service-Controller (MSC), validação com Form Requests, formatação de respostas com API Resources e as convenções PSR que a comunidade PHP segue.</p>
 
@@ -1147,13 +1293,14 @@ php artisan make:model Book</code></pre>
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+<span class="diff-add">use Illuminate\Database\Eloquent\Factories\HasFactory;</span>
 use Illuminate\Database\Eloquent\Model;
 <span class="diff-add">use Illuminate\Database\Eloquent\Relations\HasMany;</span>
 
 class Genre extends Model
 {
-    use HasFactory;
+<span class="diff-del">    //</span>
+<span class="diff-add">    use HasFactory;</span>
 <span class="diff-add"></span>
 <span class="diff-add">    protected $fillable = [</span>
 <span class="diff-add">        'name',</span>
@@ -1173,13 +1320,14 @@ class Genre extends Model
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+<span class="diff-add">use Illuminate\Database\Eloquent\Factories\HasFactory;</span>
 use Illuminate\Database\Eloquent\Model;
 <span class="diff-add">use Illuminate\Database\Eloquent\Relations\BelongsTo;</span>
 
 class Book extends Model
 {
-    use HasFactory;
+<span class="diff-del">    //</span>
+<span class="diff-add">    use HasFactory;</span>
 <span class="diff-add"></span>
 <span class="diff-add">    protected $fillable = [</span>
 <span class="diff-add">        'genre_id',</span>
@@ -1197,7 +1345,12 @@ class Book extends Model
 }</code></pre>
   </figure>
 
-  <p>Repare no <code>use HasFactory;</code>: o <code>make:model</code> já gera a classe com esse trait, e nós o mantivemos — é ele que liga o model às <em>factories</em> de dados de teste que vamos sugerir como próximo passo no Passo 12.</p>
+  <p>Repare no <code>use HasFactory;</code> e no <code>use</code> que o acompanha lá em cima: eles estão marcados como linhas novas porque o <code>php artisan make:model Genre</code> <strong>não</strong> os gera. O esqueleto que o Artisan cria traz só o <code>use Illuminate\Database\Eloquent\Model;</code> e um <code>//</code> no corpo da classe — o trait e o seu <code>use</code> só aparecem se você passar a opção <code>--factory</code> (ou <code>-f</code>). Nós os adicionamos à mão: é o <code>HasFactory</code> que liga o model às <em>factories</em> de dados de teste que vamos sugerir como próximo passo no Passo 12.</p>
+
+  <div class="callout callout--tip">
+    <p class="callout-label">Dica</p>
+    <p>Para não digitar isso toda vez, gere o model já com a factory: <code>php artisan make:model Genre --factory</code>. O Artisan escreve o <code>use HasFactory;</code> por você (com um docblock <code>@use HasFactory&lt;...&gt;</code> extra) e ainda cria o arquivo <code>database/factories/GenreFactory.php</code>.</p>
+  </div>
 
   <h3>Conceito: o que é o <code>$fillable</code>?</h3>
   <p>Métodos como <code>Book::create($data)</code> fazem <em>atribuição em massa</em>: preenchem várias colunas de uma vez a partir de um array. Isso é conveniente — e perigoso, se o array vier direto do cliente com campos que ele não deveria alterar. O <code>$fillable</code> é a lista de permissão: <strong>só as colunas listadas podem ser preenchidas em massa</strong>. Qualquer outro campo enviado é silenciosamente ignorado.</p>
@@ -1482,7 +1635,7 @@ class BookController extends Controller
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
     <p><strong>Você vai ver por aí: route model binding.</strong> Em muito código Laravel a assinatura seria <code>show(Genre $genre)</code> — o framework busca o registro e injeta o model pronto, com 404 automático. A pergunta certa para escolher entre binding e id explícito não é "qual é melhor?", e sim <strong>onde mora a busca no banco</strong>. O binding faz o fetch na camada de roteamento, <em>antes</em> do controller. Num projeto em que o controller fala direto com o Eloquent, isso é ótimo: menos código, 404 de graça. Mas no Passo 8 vamos refatorar para que <strong>só a camada Service toque o banco</strong> — e aí o binding jogaria contra: o <code>findOrFail</code> do service viraria código redundante, o acesso ao banco ficaria espalhado em duas camadas, e os services deixariam de ser autossuficientes (um job ou command que chamasse <code>update($id, $data)</code> teria que buscar o model por conta própria). Por isso, <strong>neste projeto</strong>, ids explícitos são a escolha coerente — não uma superioridade geral de um sobre o outro. Se um dia a URL usasse slug/UUID ou houvesse rotas aninhadas com escopo, a balança penderia de volta para o binding.</p>
-    <p>Uma aresta para conhecer (que, aliás, o binding <em>não</em> resolve de verdade): com o parâmetro tipado como <code>int</code>, um <code>GET /api/genres/abc</code> estoura um <code>TypeError</code> — status <strong>500</strong> — em vez de 404. Com binding implícito o mesmo request viraria <code>WHERE id = 'abc'</code>, que retorna 404 no MySQL mas estoura 500 no Postgres. Nos dois mundos a solução é a mesma: restrinja o parâmetro a dígitos com <code>-&gt;whereNumber()</code> na rota (faremos isso na rota bônus do Passo 12) ou com <code>Route::pattern()</code> para o arquivo de rotas inteiro.</p>
+    <p>Uma aresta para conhecer (que, aliás, o binding <em>não</em> resolve de verdade): com o parâmetro tipado como <code>int</code>, um <code>GET /api/genres/abc</code> estoura um <code>TypeError</code> — status <strong>500</strong> — em vez de 404. Com binding implícito o mesmo request viraria <code>WHERE id = 'abc'</code>, que retorna 404 no MySQL mas estoura 500 no Postgres. Nos dois mundos a solução é a mesma: restrinja o parâmetro a dígitos com <code>-&gt;whereNumber('id')</code> na rota ou com <code>Route::pattern('id', '[0-9]+')</code> para o arquivo de rotas inteiro — aí o request morre no roteador, com 404, e nem chega ao controller.</p>
   </div>
 
   <div class="callout callout--warn">
@@ -1654,10 +1807,117 @@ class BookService
 }</code></pre>
   </figure>
 
+  <h3>Aprofundando: eager loading e o problema N+1</h3>
+  <p>Duas linhas do <code>BookService</code> merecem parar tudo: o <code>Book::with('genre')</code> do <code>listAll()</code> e do <code>findById()</code>. Sem esse <code>with()</code> o código continua funcionando — e é exatamente por isso que o <strong>N+1</strong> é o problema de performance mais comum em APIs Laravel: ele não quebra nada, só deixa tudo lento, e em silêncio. Vamos ver o antes e o depois, em quatro tempos.</p>
+
+  <h4>1. Sem eager loading, o gênero simplesmente não vem</h4>
+  <p>Suponha que o service fizesse apenas <code>Book::findOrFail($id)</code>, sem o <code>with()</code>. Esta seria a resposta de <code>GET /api/books/1</code>:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — GET /api/books/1 <em>sem</em> o with('genre')</figcaption>
+    <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool
+
+{
+    "id": 1,
+    "genre_id": 1,
+    "title": "The Hobbit",
+    "author": "J.R.R. Tolkien",
+    "pages": 310,
+    "status": "finished",
+    "rating": 5,
+    "created_at": "2025-07-22T12:00:00.000000Z",
+    "updated_at": "2025-07-22T12:00:00.000000Z"
+}</code></pre>
+  </figure>
+
+  <p>Olhe o que o cliente recebeu sobre o gênero: <code>"genre_id": 1</code>. Um número. Para escrever "The Hobbit — Fantasy" numa tela, o app precisa fazer uma <strong>segunda requisição</strong>, <code>GET /api/genres/1</code>. Numa listagem de 12 livros, são até 12 requisições extras — cada uma com uma viagem de rede inteira. O N+1 <em>começa</em> aqui, do lado de fora da API: uma consulta para a lista, mais N para completar cada item.</p>
+
+  <h4>2. A saída ingênua: tocar em <code>$book-&gt;genre</code> dentro de um laço</h4>
+  <p>"Fácil: eu embuto o gênero na resposta e pronto." E aí o Eloquent faz algo muito conveniente e muito caro — o <strong>lazy loading</strong>: na primeira vez que você toca em <code>$book-&gt;genre</code>, ele vai ao banco buscar aquele gênero. Uma consulta <em>por livro</em>. Dá para ver acontecendo com o registrador de consultas do Laravel, no tinker:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — php artisan tinker</figcaption>
+    <pre><code>&gt; use App\Models\Book;
+
+&gt; DB::enableQueryLog();
+
+&gt; $books = Book::all();                              // 1 query: the books
+
+&gt; foreach ($books as $book) { $book-&gt;genre-&gt;name; }  // +1 query per book!
+
+&gt; count(DB::getQueryLog());
+= 13</code></pre>
+  </figure>
+
+  <p>Treze consultas para montar uma lista de doze livros: <strong>1</strong> para os livros <strong>+ N</strong> para os gêneros — daí o nome do problema. E o número acompanha o tamanho da estante: com 1.000 livros seriam 1.001 consultas na mesma rota. Repare também no desperdício: são só <strong>4</strong> gêneros no banco, e o código foi buscar o mesmo registro várias vezes.</p>
+
+  <h4>3. O <code>with('genre')</code>: duas consultas, sempre</h4>
+  <p>O eager loading (carregamento adiantado) inverte a ordem das coisas: em vez de esperar o código pedir o gênero de cada livro, o Eloquent busca <strong>todos os gêneros de uma vez</strong>, logo depois de buscar os livros, e costura cada gênero no seu livro em memória. Rode a segunda metade do experimento:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — php artisan tinker</figcaption>
+    <pre><code>&gt; DB::flushQueryLog();
+
+&gt; $books = Book::with('genre')-&gt;get();
+
+&gt; foreach ($books as $book) { $book-&gt;genre-&gt;name; }  // no extra queries at all
+
+&gt; collect(DB::getQueryLog())-&gt;pluck('query');
+= Illuminate\Support\Collection {
+    all: [
+      "select * from `books`",
+      "select * from `genres` where `genres`.`id` in (?, ?, ?, ?)",
+    ],
+  }</code></pre>
+  </figure>
+
+  <p>Duas consultas — e a segunda é a peça-chave. Os <code>?</code> são os <code>genre_id</code> distintos que apareceram na primeira consulta: o Eloquent os coleta, busca todos os gêneros correspondentes num único <code>where in</code> e distribui cada objeto para o livro certo. Doze livros ou doze mil, continuam sendo <strong>duas</strong> consultas.</p>
+
+  <h4>4. E o JSON passa a vir completo</h4>
+  <p>Com o <code>with('genre')</code> de volta ao service, o mesmo <code>GET /api/books/1</code> devolve o gênero <strong>aninhado</strong>, e o cliente resolve tudo em uma requisição só:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — GET /api/books/1 <em>com</em> o with('genre')</figcaption>
+    <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool
+
+{
+    "id": 1,
+    "genre_id": 1,
+    "title": "The Hobbit",
+    "author": "J.R.R. Tolkien",
+    "pages": 310,
+    "status": "finished",
+    "rating": 5,
+    "created_at": "2025-07-22T12:00:00.000000Z",
+    "updated_at": "2025-07-22T12:00:00.000000Z",
+    "genre": {
+        "id": 1,
+        "name": "Fantasy",
+        "description": "Magic, mythical creatures and epic quests.",
+        "created_at": "2025-07-22T12:00:00.000000Z",
+        "updated_at": "2025-07-22T12:00:00.000000Z"
+    }
+}</code></pre>
+  </figure>
+
+  <p>Não é coincidência: ao serializar um model para JSON, o Eloquent inclui os relacionamentos <strong>que já estão carregados</strong> — e só eles. Carregar a relação e expô-la na resposta acabam sendo, aqui, o mesmo gesto. Quer conferir com os próprios olhos? Comente o <code>with('genre')</code> no <code>BookService</code>, repita o <code>curl</code> e veja a chave <code>"genre"</code> desaparecer.</p>
+
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
-    <p><strong>Eager loading:</strong> repare no <code>Book::with('genre')</code>. Sem ele, listar 12 livros e acessar o gênero de cada um dispararia 1 consulta para os livros + 12 para os gêneros (o "problema N+1"). O <code>with('genre')</code> carrega tudo em 2 consultas. Decidir isso é papel da camada Service — e de quebra os livros passam a vir com o gênero embutido no JSON.</p>
+    <p><strong>Por que essa decisão mora no Service?</strong> Porque "de quais dados esta operação precisa" é uma pergunta de negócio, não de HTTP. O controller não deveria nem saber que existe uma tabela <code>genres</code>; o model não sabe em que contexto está sendo usado. O service, que orquestra os dois, é o único lugar com informação suficiente para decidir "nesta listagem, o gênero vem junto".</p>
   </div>
+
+  <div class="callout callout--tip">
+    <p class="callout-label">Boa prática</p>
+    <p>Eager loading não é "quanto mais, melhor". Repare que o <code>GenreService::listAll()</code> <strong>não</strong> tem <code>with('books')</code>: a resposta de gênero não expõe os livros, então carregá-los seria trazer 12 registros do banco para jogar fora — o erro oposto, e igualmente caro. A regra prática cabe em uma linha: <strong>carregue o que a resposta vai usar, e só isso</strong>.</p>
+  </div>
+
+  <div class="callout callout--warn">
+    <p class="callout-label">Atenção</p>
+    <p>O N+1 é traiçoeiro porque só aparece em escala: em desenvolvimento, com 12 livros e o banco na mesma máquina, as 13 consultas se perdem no ruído. Em produção, com milhares de registros e o banco em outro servidor, cada consulta extra é uma ida e volta de rede — e a rota que respondia em 20 ms passa a levar segundos. Para não descobrir isso pelo cliente reclamando, peça ao Laravel que <em>proíba</em> lazy loading fora de produção: um <code>Model::preventLazyLoading(! app()-&gt;isProduction());</code> no método <code>boot()</code> do <code>AppServiceProvider</code> faz qualquer acesso a uma relação não carregada estourar exceção na hora, na sua máquina.</p>
+  </div>
+
+  <p>No Passo 9 esse assunto volta com outro nome: quando as API Resources assumirem o controle da saída, o <code>whenLoaded('genre')</code> vai incluir o gênero no JSON <strong>apenas</strong> se ele tiver sido carregado — garantindo que a camada de apresentação nunca dispare uma consulta escondida por conta própria.</p>
 
   <h3>Mão na massa: controllers magros com injeção de dependência</h3>
   <p>Agora os controllers delegam tudo. Repare no construtor: declaramos que o controller <em>precisa</em> de um service, e o <strong>Service Container</strong> do Laravel cria e entrega a instância automaticamente — isso é <strong>injeção de dependência</strong>. A sintaxe <code>private GenreService $genreService</code> direto no construtor (promoção de propriedades, do PHP 8) declara e atribui a propriedade de uma vez só.</p>
@@ -1776,6 +2036,7 @@ curl http://localhost:8000/api/books -H 'Accept: application/json'</code></pre>
       <li><label><input type="checkbox" data-ck="p8-1"> <span><code>GET /api/genres</code> responde exatamente como antes da refatoração.</span></label></li>
       <li><label><input type="checkbox" data-ck="p8-2"> <span><code>GET /api/books</code> agora inclui o objeto <code>genre</code> dentro de cada livro.</span></label></li>
       <li><label><input type="checkbox" data-ck="p8-3"> <span>Os controllers não contêm mais nenhuma chamada direta a <code>Genre::</code> ou <code>Book::</code> — tudo passa pelos services.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p8-4"> <span>No tinker, o experimento do query log mostrou <strong>13</strong> consultas sem o <code>with('genre')</code> e <strong>2</strong> com ele.</span></label></li>
     </ul>
   </div>
 </section>
@@ -2300,71 +2561,14 @@ curl -i -X POST http://localhost:8000/api/books \
       <li><label><input type="checkbox" data-ck="p11-8"> <span><span class="m m-get">GET</span> <code>/api/books/{id}</code> → 200 com um livro.</span></label></li>
       <li><label><input type="checkbox" data-ck="p11-9"> <span><span class="m m-put">PUT</span> <code>/api/books/{id}</code> → 200 com o livro atualizado.</span></label></li>
       <li><label><input type="checkbox" data-ck="p11-10"> <span><span class="m m-delete">DELETE</span> <code>/api/books/{id}</code> → 204.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p11-11"> <span>Bônus de arquiteto: a exclusão do gênero apagou os livros dele em cascata (teste 12 retornou 404).</span></label></li>
+      <li><label><input type="checkbox" data-ck="p11-11"> <span>A exclusão do gênero apagou os livros dele em cascata (teste 12 retornou 404).</span></label></li>
       <li><label><input type="checkbox" data-ck="p11-12"> <span>Requisições inválidas retornam 422 com mensagens claras (testes 13 e 14).</span></label></li>
     </ul>
   </div>
 </section>
 
 <section class="step" id="passo-12">
-  <h2><span class="step-badge">Passo 12</span> Bônus e próximos passos</h2>
-
-  <h3>Conceito: rotas aninhadas</h3>
-  <p>O enunciado propõe um bônus: <code>GET /api/genres/{id}/books</code>, listando os livros de um gênero específico. A URL conta uma relação — "os books <em>deste</em> genre" — e é um padrão comum em APIs REST. Não existe <code>apiResource</code> para isso; declaramos a rota explicitamente e criamos um método extra, atravessando as três camadas da nossa arquitetura MSC.</p>
-
-  <h3>Mão na massa: a rota bônus em três toques</h3>
-  <p><strong>1. Service</strong> — a lógica: encontrar o gênero (404 automático se não existir) e devolver seus livros pelo relacionamento <code>hasMany</code> do Passo 6. Adicione ao <code>GenreService</code>:</p>
-
-  <figure class="code code--php">
-    <figcaption>app/Services/GenreService.php (adicionar método)</figcaption>
-    <pre><code>public function listBooks(int $id): Collection
-{
-    return Genre::findOrFail($id)-&gt;books;
-}</code></pre>
-  </figure>
-
-  <p><strong>2. Controller</strong> — o método <code>books</code>, que delega e formata. Adicione ao <code>GenreController</code> (e o import <code>use App\Http\Resources\BookResource;</code> no topo do arquivo):</p>
-
-  <figure class="code code--php">
-    <figcaption>app/Http/Controllers/Api/GenreController.php (adicionar método)</figcaption>
-    <pre><code>public function books(int $id)
-{
-    return BookResource::collection($this-&gt;genreService-&gt;listBooks($id));
-}</code></pre>
-  </figure>
-
-  <p><strong>3. Rota</strong> — o arquivo final de rotas fica assim:</p>
-
-  <figure class="code code--php">
-    <figcaption>routes/api.php (versão final)</figcaption>
-    <pre><code>&lt;?php
-
-use App\Http\Controllers\Api\BookController;
-use App\Http\Controllers\Api\GenreController;
-use Illuminate\Support\Facades\Route;
-
-Route::apiResource('genres', GenreController::class);
-Route::apiResource('books', BookController::class);
-<span class="diff-add">Route::get('genres/{id}/books', [GenreController::class, 'books'])-&gt;whereNumber('id');</span></code></pre>
-  </figure>
-
-  <p>O <code>-&gt;whereNumber('id')</code> paga a promessa do Passo 7: o parâmetro só casa com dígitos, então um <code>GET /api/genres/abc/books</code> morre no roteador com <strong>404</strong> — nem chega ao controller.</p>
-
-  <div class="verify">
-    <h4>Como verificar</h4>
-    <figure class="code code--term">
-      <figcaption>Terminal</figcaption>
-      <pre><code># the 3 Fantasy books (genre 1)
-curl http://localhost:8000/api/genres/1/books -H 'Accept: application/json'
-
-# a missing genre still yields 404
-curl -i http://localhost:8000/api/genres/999/books -H 'Accept: application/json'</code></pre>
-    </figure>
-    <ul class="checklist">
-      <li><label><input type="checkbox" data-ck="p12-1"> <span><code>GET /api/genres/1/books</code> retorna os 3 livros de Fantasy.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p12-2"> <span><code>GET /api/genres/999/books</code> retorna 404.</span></label></li>
-    </ul>
-  </div>
+  <h2><span class="step-badge">Passo 12</span> Revisão final e próximos passos</h2>
 
   <h3>O que você construiu</h3>
   <p>Confira o projeto final contra o enunciado do BookShelf — requisito por requisito:</p>
@@ -2380,7 +2584,6 @@ curl -i http://localhost:8000/api/genres/999/books -H 'Accept: application/json'
         <tr><td>Seeders com 4 gêneros e 12 livros; <code>php artisan db:seed</code> sem erros</td><td>Passo 5</td></tr>
         <tr><td>Models <code>Genre</code> e <code>Book</code> com <code>$fillable</code>, <code>hasMany</code>/<code>belongsTo</code> e Eloquent nos CRUDs</td><td>Passo 6</td></tr>
         <tr><td>Sem middleware nem autenticação — todas as rotas públicas</td><td>Respeitado do início ao fim</td></tr>
-        <tr><td>Bônus: <code>GET /api/genres/{id}/books</code></td><td>Passo 12</td></tr>
       </tbody>
     </table>
   </div>
@@ -2432,14 +2635,14 @@ curl -i http://localhost:8000/api/genres/999/books -H 'Accept: application/json'
 
   <div class="callout callout--concept">
     <p class="callout-label">Próximo módulo</p>
-    <p>Sua API funciona — mas está aberta ao mundo: qualquer pessoa pode apagar sua estante inteira com um <code>curl</code>. O <strong>próximo módulo do curso</strong> resolve exatamente isso: <strong>middlewares</strong> (as camadas que interceptam requisições, do ciclo de vida do Passo 3) e <strong>autenticação</strong>, transformando o BookShelf em uma API protegida, com usuários e rotas privadas. Até lá!</p>
+    <p>Sua API funciona — mas está aberta ao mundo: qualquer pessoa pode apagar sua estante inteira com um <code>curl</code>. O <strong>próximo módulo do curso</strong> resolve exatamente isso: <strong>middlewares</strong> (as camadas que interceptam requisições, do ciclo de vida do Passo 3) e <strong>autenticação por tokens com o Laravel Sanctum</strong>, transformando o BookShelf em uma API protegida, com usuários, rotas privadas e tokens que expiram. Ele continua exatamente de onde este parou: <a href="html-sanctum-auth-tutorial.html">BookShelf API protegida — autenticação com Laravel Sanctum</a>. Até lá!</p>
   </div>
 
   <div class="verify">
     <h4>Checklist final do projeto</h4>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p12-3"> <span><code>php artisan migrate:fresh --seed</code> reconstrói o banco do zero sem nenhum erro.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p12-4"> <span>Os 10 endpoints + o bônus respondem como esperado (Passos 11 e 12).</span></label></li>
+      <li><label><input type="checkbox" data-ck="p12-4"> <span>Os 10 endpoints respondem como esperado (Passo 11).</span></label></li>
       <li><label><input type="checkbox" data-ck="p12-5"> <span>A tabela de requisitos acima está 100% coberta pelo seu código.</span></label></li>
     </ul>
   </div>
@@ -2455,24 +2658,39 @@ curl -i http://localhost:8000/api/genres/999/books -H 'Accept: application/json'
 
 <script>
 (function () {
-  // Dark theme toggle, persisted in localStorage
-  var themeBtn = document.getElementById('theme-toggle');
-  function syncThemeButton() {
-    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    themeBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
-    themeBtn.setAttribute('aria-label', dark ? 'Mudar para tema claro' : 'Mudar para tema escuro');
-  }
-  themeBtn.addEventListener('click', function () {
-    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    if (dark) {
-      document.documentElement.removeAttribute('data-theme');
+  // Theme switch: auto (follows the viewer) / light / dark, remembered per reader
+  var themeKey = 'bookshelf-tutorial:theme';
+  var themeButtons = document.querySelectorAll('.theme-switch button[data-theme-set]');
+
+  function applyTheme(mode) {
+    var root = document.documentElement;
+    if (mode === 'light' || mode === 'dark') {
+      root.setAttribute('data-user-theme', mode);
     } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
+      root.removeAttribute('data-user-theme');
     }
-    try { localStorage.setItem('bookshelf-tutorial:theme', dark ? 'light' : 'dark'); } catch (e) {}
-    syncThemeButton();
+    Array.prototype.forEach.call(themeButtons, function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-theme-set') === mode ? 'true' : 'false');
+    });
+  }
+
+  var storedTheme = 'auto';
+  try {
+    var raw = localStorage.getItem(themeKey);
+    if (raw === 'light' || raw === 'dark') { storedTheme = raw; }
+  } catch (e) {}
+  applyTheme(storedTheme);
+
+  Array.prototype.forEach.call(themeButtons, function (btn) {
+    btn.addEventListener('click', function () {
+      var mode = btn.getAttribute('data-theme-set');
+      applyTheme(mode);
+      try {
+        if (mode === 'auto') { localStorage.removeItem(themeKey); }
+        else { localStorage.setItem(themeKey, mode); }
+      } catch (e) {}
+    });
   });
-  syncThemeButton();
 
   // Persist checklist state in localStorage
   var boxes = document.querySelectorAll('.checklist input[type="checkbox"]');
