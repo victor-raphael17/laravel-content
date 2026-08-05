@@ -307,6 +307,13 @@ h2 code, h3 code { font-size: .8em; }
 .code pre .diff-del::before { content: "\2212"; color: #f85149; }
 .code pre .diff-add:empty::after,
 .code pre .diff-del:empty::after { content: "\00a0"; }
+.code pre .pr { color: #6e7681; user-select: none; -webkit-user-select: none; }
+.code pre .out { color: #768390; }
+.code pre .ph { color: #d29922; }
+.code--out { border-left: 3px solid #6e7681; }
+.code--out figcaption::before { background: #6e7681; }
+.code--out pre { color: #adbac7; background: #0d1117; }
+.code--out figcaption { font-style: italic; }
 .code-copy {
   margin-left: auto; flex: 0 0 auto;
   display: inline-flex; align-items: center; gap: 6px;
@@ -377,6 +384,7 @@ ol.flow li { margin: .45em 0; }
 .dot--add { background: #3fb950; }
 .dot--del { background: #f85149; }
 .dot--ctx { background: #6e7681; }
+.dot--out { background: #6e7681; }
 footer.end {
   margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line);
   color: var(--ink-soft); font-size: .85rem;
@@ -500,6 +508,14 @@ footer.end {
     <li><span class="dot dot--term"></span> <strong>Verde</strong> — comandos de terminal (shell).</li>
     <li><span class="dot dot--php"></span> <strong>Azul</strong> — código PHP (o cabeçalho mostra o caminho do arquivo).</li>
     <li><span class="dot dot--file"></span> <strong>Âmbar</strong> — arquivos de configuração (<code>.env</code>, YAML, Dockerfile) e estruturas de pastas.</li>
+    <li><span class="dot dot--out"></span> <strong>Cinza</strong> — <em>saída</em>: o que o terminal ou a API respondem. É para ler, não para rodar — por isso esses blocos não têm botão "Copiar".</li>
+  </ul>
+
+  <p>Dentro de um bloco verde, <strong>o que é seu para digitar e o que é resposta da máquina nunca se misturam na hora de copiar</strong>. O botão "Copiar" entrega só os comandos: ele descarta as linhas de saída, o prompt <code>&gt;</code> do tinker e as linhas removidas do diff. Copiar e colar funciona de primeira, sem selecionar nada na mão.</p>
+  <ul class="legend">
+    <li><span class="dot dot--term"></span> <strong>Texto claro</strong> — comando: é o que você roda.</li>
+    <li><span class="dot dot--out"></span> <strong>Texto cinza</strong> — saída do comando anterior, mostrada para você comparar com a sua. Não é copiada.</li>
+    <li><span class="dot dot--file"></span> <strong>Texto âmbar</strong> — valor de exemplo que você precisa trocar pelo seu antes de rodar (um id, um token).</li>
   </ul>
 
   <p>Além disso, quando um bloco mostra um arquivo <strong>que já existe</strong> sendo editado — em geral, um esqueleto gerado por <code>php artisan make:...</code> —, as linhas são marcadas como num <em>diff</em> do Git/GitHub:</p>
@@ -837,7 +853,7 @@ docker compose exec php php artisan install:api</code></pre>
   <h3>Conceito: a estrutura de pastas do Laravel 11/12</h3>
   <p>O <code>laravel new</code> gerou dezenas de arquivos — e no Passo 2 somamos a eles os arquivos de infraestrutura (<code>Dockerfile</code>, <code>Dockerfile.dev</code>, <code>.dockerignore</code>, <code>compose.yaml</code>), todos na raiz do projeto. Calma: você não precisa entender todos hoje. Este é o mapa do que importa:</p>
 
-  <figure class="code code--file">
+  <figure class="code code--file" data-nocopy>
     <figcaption>Estrutura de pastas — bookshelf-api/</figcaption>
     <pre><code>bookshelf-api/
 ├── Dockerfile              # production image (Passo 2)
@@ -926,9 +942,7 @@ docker compose exec php php artisan install:api</code></pre>
   <figure class="code code--term">
     <figcaption>Terminal</figcaption>
     <pre><code>curl http://localhost:8000/api/ping
-
-# expected response:
-# {"message":"pong"}</code></pre>
+<span class="out">{"message":"pong"}</span></code></pre>
   </figure>
 
   <p>O que acabou de acontecer: o Router encontrou <code>ping</code> em <code>routes/api.php</code> (por isso o prefixo <code>/api</code>), os middlewares padrão passaram a requisição adiante e a função retornou JSON. Requisição → Router → Middleware → resposta JSON. Sem o Controller ainda — ele entra no Passo 7.</p>
@@ -1253,14 +1267,14 @@ class DatabaseSeeder extends Seeder
     <p>Use o <code>php artisan tinker</code> (um console interativo do Laravel) para inspecionar o banco:</p>
     <figure class="code code--term">
       <figcaption>Terminal — php artisan tinker</figcaption>
-      <pre><code>&gt; DB::table('genres')-&gt;count();
-= 4
+      <pre><code><span class="pr">&gt; </span>DB::table('genres')-&gt;count();
+<span class="out">= 4</span>
 
-&gt; DB::table('books')-&gt;count();
-= 12
+<span class="pr">&gt; </span>DB::table('books')-&gt;count();
+<span class="out">= 12</span>
 
-&gt; DB::table('books')-&gt;where('status', 'reading')-&gt;count();
-= 3</code></pre>
+<span class="pr">&gt; </span>DB::table('books')-&gt;where('status', 'reading')-&gt;count();
+<span class="out">= 3</span></code></pre>
     </figure>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p5-1"> <span><code>php artisan migrate</code> criou as tabelas <code>genres</code> e <code>books</code> sem erros.</span></label></li>
@@ -1483,14 +1497,14 @@ class BookSeeder extends Seeder
     <p>De volta ao <code>php artisan tinker</code>, agora falando a língua do Eloquent:</p>
     <figure class="code code--term">
       <figcaption>Terminal — php artisan tinker</figcaption>
-      <pre><code>&gt; App\Models\Genre::count();
-= 4
+      <pre><code><span class="pr">&gt; </span>App\Models\Genre::count();
+<span class="out">= 4</span>
 
-&gt; App\Models\Genre::first()-&gt;books-&gt;count();
-= 3
+<span class="pr">&gt; </span>App\Models\Genre::first()-&gt;books-&gt;count();
+<span class="out">= 3</span>
 
-&gt; App\Models\Book::find(4)-&gt;genre-&gt;name;
-= "Science Fiction"</code></pre>
+<span class="pr">&gt; </span>App\Models\Book::find(4)-&gt;genre-&gt;name;
+<span class="out">= "Science Fiction"</span></code></pre>
     </figure>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p6-1"> <span><code>Genre::count()</code> retorna 4 no tinker.</span></label></li>
@@ -1815,9 +1829,12 @@ class BookService
 
   <figure class="code code--term">
     <figcaption>Terminal — GET /api/books/1 <em>sem</em> o with('genre')</figcaption>
-    <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool
+    <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool</code></pre>
+  </figure>
 
-{
+  <figure class="code code--out">
+    <figcaption>Saída — o gênero não veio junto</figcaption>
+    <pre><code>{
     "id": 1,
     "genre_id": 1,
     "title": "The Hobbit",
@@ -1837,16 +1854,16 @@ class BookService
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
-    <pre><code>&gt; use App\Models\Book;
+    <pre><code><span class="pr">&gt; </span>use App\Models\Book;
 
-&gt; DB::enableQueryLog();
+<span class="pr">&gt; </span>DB::enableQueryLog();
 
-&gt; $books = Book::all();                              // 1 query: the books
+<span class="pr">&gt; </span>$books = Book::all();                              // 1 query: the books
 
-&gt; foreach ($books as $book) { $book-&gt;genre-&gt;name; }  // +1 query per book!
+<span class="pr">&gt; </span>foreach ($books as $book) { $book-&gt;genre-&gt;name; }  // +1 query per book!
 
-&gt; count(DB::getQueryLog());
-= 13</code></pre>
+<span class="pr">&gt; </span>count(DB::getQueryLog());
+<span class="out">= 13</span></code></pre>
   </figure>
 
   <p>Treze consultas para montar uma lista de doze livros: <strong>1</strong> para os livros <strong>+ N</strong> para os gêneros — daí o nome do problema. E o número acompanha o tamanho da estante: com 1.000 livros seriam 1.001 consultas na mesma rota. Repare também no desperdício: são só <strong>4</strong> gêneros no banco, e o código foi buscar o mesmo registro várias vezes.</p>
@@ -1856,19 +1873,19 @@ class BookService
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
-    <pre><code>&gt; DB::flushQueryLog();
+    <pre><code><span class="pr">&gt; </span>DB::flushQueryLog();
 
-&gt; $books = Book::with('genre')-&gt;get();
+<span class="pr">&gt; </span>$books = Book::with('genre')-&gt;get();
 
-&gt; foreach ($books as $book) { $book-&gt;genre-&gt;name; }  // no extra queries at all
+<span class="pr">&gt; </span>foreach ($books as $book) { $book-&gt;genre-&gt;name; }  // no extra queries at all
 
-&gt; collect(DB::getQueryLog())-&gt;pluck('query');
-= Illuminate\Support\Collection {
+<span class="pr">&gt; </span>collect(DB::getQueryLog())-&gt;pluck('query');
+<span class="out">= Illuminate\Support\Collection {
     all: [
       "select * from `books`",
       "select * from `genres` where `genres`.`id` in (?, ?, ?, ?)",
     ],
-  }</code></pre>
+  }</span></code></pre>
   </figure>
 
   <p>Duas consultas — e a segunda é a peça-chave. Os <code>?</code> são os <code>genre_id</code> distintos que apareceram na primeira consulta: o Eloquent os coleta, busca todos os gêneros correspondentes num único <code>where in</code> e distribui cada objeto para o livro certo. Doze livros ou doze mil, continuam sendo <strong>duas</strong> consultas.</p>
@@ -1878,9 +1895,12 @@ class BookService
 
   <figure class="code code--term">
     <figcaption>Terminal — GET /api/books/1 <em>com</em> o with('genre')</figcaption>
-    <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool
+    <pre><code>curl -s http://localhost:8000/api/books/1 -H 'Accept: application/json' | python3 -m json.tool</code></pre>
+  </figure>
 
-{
+  <figure class="code code--out">
+    <figcaption>Saída — o gênero vem aninhado</figcaption>
+    <pre><code>{
     "id": 1,
     "genre_id": 1,
     "title": "The Hobbit",
@@ -2590,7 +2610,7 @@ curl -i -X POST http://localhost:8000/api/books \
 
   <p>E esta é a anatomia final do que você escreveu:</p>
 
-  <figure class="code code--file">
+  <figure class="code code--file" data-nocopy>
     <figcaption>Estrutura final — bookshelf-api/</figcaption>
     <pre><code>bookshelf-api/
 ├── app/
@@ -2747,11 +2767,35 @@ curl -i -X POST http://localhost:8000/api/books \
     });
   }
 
+  // Everything the terminal prints back — prompts, results, responses — is
+  // marked up so it can be shown but never copied. What lands on the
+  // clipboard is exactly what you can paste and run.
+  function copyableText(codeEl) {
+    var clone = codeEl.cloneNode(true);
+    // whole lines that are not yours to run: removed diff lines and output
+    Array.prototype.forEach.call(clone.querySelectorAll('.diff-del, .out'), function (el) {
+      var next = el.nextSibling;
+      if (next && next.nodeType === 3) { next.textContent = next.textContent.replace(/^\n/, ''); }
+      el.parentNode.removeChild(el);
+    });
+    // inline prompt markers ("> " in tinker, "$ " in the shell)
+    Array.prototype.forEach.call(clone.querySelectorAll('.pr'), function (el) {
+      el.parentNode.removeChild(el);
+    });
+    return clone.textContent
+      .replace(/[ \t]+$/gm, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/^\n+/, '')
+      .replace(/\s+$/, '');
+  }
+
   var blocks = document.querySelectorAll('figure.code');
   Array.prototype.forEach.call(blocks, function (fig) {
     var codeEl = fig.querySelector('pre code');
     var caption = fig.querySelector('figcaption');
     if (!codeEl || !caption) { return; }
+    // output-only blocks (and diagrams) are there to be read, not run
+    if (fig.classList.contains('code--out') || fig.hasAttribute('data-nocopy')) { return; }
 
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -2763,14 +2807,7 @@ curl -i -X POST http://localhost:8000/api/books \
     var label = btn.querySelector('.code-copy-label');
     var resetTimer;
     btn.addEventListener('click', function () {
-      // removed (diff-del) lines must not be part of the copied code
-      var clone = codeEl.cloneNode(true);
-      Array.prototype.forEach.call(clone.querySelectorAll('.diff-del'), function (el) {
-        var next = el.nextSibling;
-        if (next && next.nodeType === 3) { next.textContent = next.textContent.replace(/^\n/, ''); }
-        el.parentNode.removeChild(el);
-      });
-      copyText(clone.textContent).then(function () {
+      copyText(copyableText(codeEl)).then(function () {
         btn.classList.add('is-copied');
         label.textContent = 'Copiado!';
         clearTimeout(resetTimer);
