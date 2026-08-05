@@ -1315,7 +1315,9 @@ Content-Type: application/json
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
-    <pre><code>&gt; $token = PersonalAccessToken::latest('id')-&gt;first();
+    <pre><code>&gt; use Laravel\Sanctum\PersonalAccessToken;
+
+&gt; $token = PersonalAccessToken::latest('id')-&gt;first();
 
 &gt; $token-&gt;expires_at-&gt;isFuture();      // the per-token clock says: still valid
 = true
