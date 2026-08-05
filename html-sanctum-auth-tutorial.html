@@ -233,6 +233,13 @@ h2 code, h3 code { font-size: .8em; }
 .code pre .diff-del::before { content: "\2212"; color: #f85149; }
 .code pre .diff-add:empty::after,
 .code pre .diff-del:empty::after { content: "\00a0"; }
+.code pre .pr { color: #6e7681; user-select: none; -webkit-user-select: none; }
+.code pre .out { color: #768390; }
+.code pre .ph { color: #d29922; }
+.code--out { border-left: 3px solid #6e7681; }
+.code--out figcaption::before { background: #6e7681; }
+.code--out pre { color: #adbac7; background: #0d1117; }
+.code--out figcaption { font-style: italic; }
 .code-copy {
   margin-left: auto; flex: 0 0 auto;
   display: inline-flex; align-items: center; gap: 6px;
@@ -303,6 +310,7 @@ ol.flow li { margin: .45em 0; }
 .dot--add { background: #3fb950; }
 .dot--del { background: #f85149; }
 .dot--ctx { background: #6e7681; }
+.dot--out { background: #6e7681; }
 footer.end {
   margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line);
   color: var(--ink-soft); font-size: .85rem;
@@ -381,7 +389,16 @@ footer.end {
     <li><span class="dot dot--term"></span> <strong>Verde</strong> — comandos de terminal (shell).</li>
     <li><span class="dot dot--php"></span> <strong>Azul</strong> — código PHP (o cabeçalho mostra o caminho do arquivo).</li>
     <li><span class="dot dot--file"></span> <strong>Âmbar</strong> — arquivos de configuração (<code>.env</code>, YAML, Dockerfile) e estruturas de pastas.</li>
+    <li><span class="dot dot--out"></span> <strong>Cinza</strong> — <em>saída</em>: o que o terminal ou a API respondem. É para ler, não para rodar — por isso esses blocos não têm botão "Copiar".</li>
   </ul>
+
+  <p>Dentro de um bloco verde, <strong>o que é seu para digitar e o que é resposta da máquina nunca se misturam na hora de copiar</strong>. O botão "Copiar" entrega só os comandos: ele descarta as linhas de saída, o prompt <code>&gt;</code> do tinker e as linhas removidas do diff. Copiar e colar funciona de primeira, sem selecionar nada na mão.</p>
+  <ul class="legend">
+    <li><span class="dot dot--term"></span> <strong>Texto claro</strong> — comando: é o que você roda.</li>
+    <li><span class="dot dot--out"></span> <strong>Texto cinza</strong> — saída do comando anterior, mostrada para você comparar com a sua. Não é copiada.</li>
+    <li><span class="dot dot--file"></span> <strong>Texto âmbar</strong> — valor de exemplo que você precisa trocar pelo seu antes de rodar (um token, um id).</li>
+  </ul>
+
   <p>E as marcações de <em>diff</em>, para arquivos que já existem:</p>
   <ul class="legend">
     <li><span class="dot dot--add"></span> <strong>Fundo verde com <code>+</code></strong> — linha nova ou alterada: é o que você escreve no arquivo.</li>
@@ -421,7 +438,7 @@ footer.end {
     <figcaption>Terminal — o header que muda tudo</figcaption>
     <pre><code>curl http://localhost:8000/api/books \
   -H 'Accept: application/json' \
-  -H 'Authorization: Bearer 3|nQ8xLd2ZpV7hK1mR...'</code></pre>
+  -H 'Authorization: Bearer <span class="ph">3|nQ8xLd2ZpV7hK1mR...</span>'</code></pre>
   </figure>
 
   <p>A palavra <strong>Bearer</strong> ("portador") não é decoração: ela descreve exatamente a natureza da coisa. Quem porta o token <em>é</em> o usuário, sem precisar de mais nada. Não há senha, não há segundo fator, não há pergunta. Guarde essa frase — ela é a justificativa de tudo o que faremos no Passo 7 sobre expiração.</p>
@@ -637,19 +654,19 @@ class UserSeeder extends Seeder
     </figure>
     <figure class="code code--term">
       <figcaption>Terminal — php artisan tinker</figcaption>
-      <pre><code>&gt; $user = App\Models\User::first();
+      <pre><code><span class="pr">&gt; </span>$user = App\Models\User::first();
 
-&gt; $user-&gt;email;
-= "demo@bookshelf.test"
+<span class="pr">&gt; </span>$user-&gt;email;
+<span class="out">= "demo@bookshelf.test"</span>
 
-&gt; $user-&gt;password;   // never the plain text
-= "$2y$12$Xy8QeV1w.../aBc"
+<span class="pr">&gt; </span>$user-&gt;password;   // never the plain text
+<span class="out">= "$2y$12$Xy8QeV1w.../aBc"</span>
 
-&gt; Hash::check('secret123', $user-&gt;password);
-= true
+<span class="pr">&gt; </span>Hash::check('secret123', $user-&gt;password);
+<span class="out">= true</span>
 
-&gt; $user-&gt;createToken('smoke-test')-&gt;plainTextToken;
-= "1|8fJk2LpQ9xNvB3mZ..."</code></pre>
+<span class="pr">&gt; </span>$user-&gt;createToken('smoke-test')-&gt;plainTextToken;
+<span class="out">= "1|8fJk2LpQ9xNvB3mZ..."</span></code></pre>
     </figure>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p3-1"> <span>O <code>User</code> tem o trait <code>HasApiTokens</code> e o import correspondente.</span></label></li>
@@ -1086,18 +1103,24 @@ public function logoutAll(Request $request)
 
   <div class="verify">
     <h4>Como verificar</h4>
-    <p>Vamos guardar o token numa variável do shell para não ficar copiando e colando string gigante. O comando abaixo faz o login e extrai o campo <code>token</code> do JSON:</p>
+    <p>Vamos guardar o token numa <strong>variável de ambiente</strong> do shell para não ficar colando string gigante em toda requisição. O comando abaixo faz o login, extrai o campo <code>token</code> do JSON e exporta o resultado em <code>$TOKEN</code>:</p>
     <figure class="code code--term">
-      <figcaption>Terminal</figcaption>
-      <pre><code>TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
+      <figcaption>Terminal — capturando o token</figcaption>
+      <pre><code>export TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -d '{"email":"demo@bookshelf.test","password":"secret123"}' \
   | python3 -c 'import sys, json; print(json.load(sys.stdin)["token"])')
 
-echo $TOKEN
-# 2|kGq7vX1... (yours will be different)
-
-# who am I? (expect 200 with the demo user, wrapped in "data")
+echo $TOKEN</code></pre>
+    </figure>
+    <figure class="code code--out">
+      <figcaption>Saída esperada do <code>echo</code> — o seu token será outro</figcaption>
+      <pre><code>2|kGq7vX1sJd9RtY2wN5mB8cF...</code></pre>
+    </figure>
+    <p>Se o <code>echo</code> não imprimir nada, o login falhou ou o <code>python3</code> não existe na sua máquina. Nesse caso rode só o <code>curl</code> do login, olhe o JSON e exporte o token na mão: <code>export TOKEN='cole-aqui-o-token'</code> (aspas simples, porque o token tem <code>|</code>). Com a variável exportada, as requisições ficam sempre iguais:</p>
+    <figure class="code code--term">
+      <figcaption>Terminal — usando o token</figcaption>
+      <pre><code># who am I? (expect 200 with the demo user, wrapped in "data")
 curl http://localhost:8000/api/me \
   -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"
 
@@ -1256,9 +1279,12 @@ private function issueToken(User $user): NewAccessToken
     <figcaption>Terminal — POST /api/login</figcaption>
     <pre><code>curl -s -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
-  -d '{"email":"demo@bookshelf.test","password":"secret123"}' | python3 -m json.tool
+  -d '{"email":"demo@bookshelf.test","password":"secret123"}' | python3 -m json.tool</code></pre>
+  </figure>
 
-{
+  <figure class="code code--out">
+    <figcaption>Saída — a resposta do login</figcaption>
+    <pre><code>{
     "user": {
         "id": 1,
         "name": "Demo Reader",
@@ -1274,8 +1300,8 @@ private function issueToken(User $user): NewAccessToken
   <h3>Conceito: o que o cliente vê quando o token expira</h3>
   <p>Exatamente isto:</p>
 
-  <figure class="code code--term">
-    <figcaption>Terminal — requisição com token expirado</figcaption>
+  <figure class="code code--out">
+    <figcaption>Saída — requisição com token expirado</figcaption>
     <pre><code>HTTP/1.1 401 Unauthorized
 Content-Type: application/json
 
@@ -1285,45 +1311,79 @@ Content-Type: application/json
   <p>Ou seja: <strong>a mesma resposta de um token inventado, de um token revogado e de nenhum token</strong>. É deliberado — a API não deve confirmar a um atacante que a string que ele testou "era válida até ontem". Para o cliente legítimo, a consequência prática é simples: ao receber 401, refaça o login e repita a requisição. E é por isso que devolver <code>expires_at</code> ajuda tanto: um app bem-feito renova antes, e o usuário nunca vê o erro.</p>
 
   <h3>Mão na massa: testando a expiração sem esperar 24 horas</h3>
-  <p>Não vamos ficar olhando o relógio. Faça login para obter um token novo, guarde-o em <code>$TOKEN</code> como no passo anterior, e então envelheça a linha correspondente no tinker.</p>
+  <p>Não vamos ficar olhando o relógio. São dois testes, e os dois começam da mesma preparação: um token recém-emitido, guardado na variável de ambiente <code>$TOKEN</code> do shell.</p>
 
-  <p><strong>Teste A — o relógio por token.</strong> Empurramos o <code>expires_at</code> para o passado:</p>
+  <h4>Preparação: um token novo em <code>$TOKEN</code></h4>
+  <p>Faça login e exporte o token. O caminho automático é o mesmo one-liner do Passo 6:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — login e export em um comando</figcaption>
+    <pre><code>export TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
+  -H 'Accept: application/json' -H 'Content-Type: application/json' \
+  -d '{"email":"demo@bookshelf.test","password":"secret123"}' \
+  | python3 -c 'import sys, json; print(json.load(sys.stdin)["token"])')
+
+echo $TOKEN</code></pre>
+  </figure>
+
+  <p>Na mão funciona igual: rode o <code>curl</code> do login, copie o valor do campo <code>token</code> da resposta e coloque-o na variável você mesmo. <strong>O comando que atribui o token à variável de ambiente é o <code>export</code></strong> — sem ele, o <code>$TOKEN</code> dos testes seguintes está vazio:</p>
+
+  <figure class="code code--term">
+    <figcaption>Terminal — export manual (troque pelo seu token)</figcaption>
+    <pre><code>export TOKEN='<span class="ph">3|kGq7vX1sJd9RtY2wN5mB8cF...</span>'
+
+echo $TOKEN</code></pre>
+  </figure>
+
+  <div class="callout callout--warn">
+    <p class="callout-label">Atenção — 401 que não é expiração</p>
+    <p>Confirme com <code>echo $TOKEN</code> antes de seguir. Se a variável estiver vazia, o <code>curl</code> manda <code>Authorization: Bearer</code> sem nada e a API devolve <strong>401</strong> — não porque o token venceu, mas porque nunca chegou. Vale lembrar também que a variável vive só naquela janela do terminal: abriu outra aba, exporte de novo. As aspas simples no valor são obrigatórias, porque o token tem o caractere <code>|</code>.</p>
+  </div>
+
+  <p><strong>Teste A — o relógio por token.</strong> Abra o tinker e empurre o <code>expires_at</code> para o passado:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
-    <pre><code>&gt; use Laravel\Sanctum\PersonalAccessToken;
+    <pre><code><span class="pr">&gt; </span>use Laravel\Sanctum\PersonalAccessToken;
 
-&gt; $token = PersonalAccessToken::latest('id')-&gt;first();
+<span class="pr">&gt; </span>$token = PersonalAccessToken::latest('id')-&gt;first();
 
-&gt; $token-&gt;expires_at;                                   // still in the future
-= Illuminate\Support\Carbon @1772... { date: 2026-03-11 09:15:02.0 UTC }
+<span class="pr">&gt; </span>$token-&gt;expires_at;                                   // still in the future
+<span class="out">= Illuminate\Support\Carbon @1772... { date: 2026-03-11 09:15:02.0 UTC }</span>
 
-&gt; $token-&gt;update(['expires_at' =&gt; now()-&gt;subMinute()]);
-= true</code></pre>
+<span class="pr">&gt; </span>$token-&gt;update(['expires_at' =&gt; now()-&gt;subMinute()]);
+<span class="out">= true</span></code></pre>
   </figure>
+
+  <p>Saia do tinker (<code>exit</code>) e repita a requisição no shell onde o <code>$TOKEN</code> está exportado:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal — o mesmo token, agora vencido</figcaption>
     <pre><code>curl -i http://localhost:8000/api/me \
-  -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"
-
-# HTTP/1.1 401 Unauthorized
-# {"message":"Unauthenticated."}</code></pre>
+  -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"</code></pre>
   </figure>
 
-  <p><strong>Teste B — o relógio global.</strong> Agora a prova de que os dois relógios são somados. Faça login de novo (token novo, com <code>expires_at</code> lá na frente) e, em vez de mexer no vencimento, envelheça a <em>criação</em> do token em dois dias:</p>
+  <figure class="code code--out">
+    <figcaption>Saída — o token venceu</figcaption>
+    <pre><code>HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{"message":"Unauthenticated."}</code></pre>
+  </figure>
+
+  <p><strong>Teste B — o relógio global.</strong> Agora a prova de que os dois relógios são somados. Refaça a preparação — login e <code>export TOKEN=...</code>, para ter um token novo com <code>expires_at</code> lá na frente — e abra o tinker outra vez. Como esta é uma <em>sessão nova</em> do tinker (a anterior morreu no <code>exit</code>), o <code>use</code> precisa ser repetido; sem ele o tinker responde <code>Class "PersonalAccessToken" not found</code>. Desta vez, em vez de mexer no vencimento, envelheça a <em>criação</em> do token em dois dias:</p>
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
-    <pre><code>&gt; use Laravel\Sanctum\PersonalAccessToken;
+    <pre><code><span class="pr">&gt; </span>use Laravel\Sanctum\PersonalAccessToken;
 
-&gt; $token = PersonalAccessToken::latest('id')-&gt;first();
+<span class="pr">&gt; </span>$token = PersonalAccessToken::latest('id')-&gt;first();
 
-&gt; $token-&gt;expires_at-&gt;isFuture();      // the per-token clock says: still valid
-= true
+<span class="pr">&gt; </span>$token-&gt;expires_at-&gt;isFuture();      // the per-token clock says: still valid
+<span class="out">= true</span>
 
-&gt; $token-&gt;forceFill(['created_at' =&gt; now()-&gt;subDays(2)])-&gt;save();
-= true</code></pre>
+<span class="pr">&gt; </span>$token-&gt;forceFill(['created_at' =&gt; now()-&gt;subDays(2)])-&gt;save();
+<span class="out">= true</span></code></pre>
   </figure>
 
   <p>Repita o <code>curl</code>: <strong>401</strong> de novo. O <code>expires_at</code> continua no futuro, mas o token nasceu há dois dias e o teto global é de 24 horas — o relógio mais curto venceu, como o código do <code>Guard</code> mostrou. (Usamos <code>forceFill()</code> porque <code>created_at</code> não está no <code>$fillable</code> do model do Sanctum; <code>update()</code> simplesmente ignoraria o campo.)</p>
@@ -1458,19 +1518,21 @@ Route::middleware('auth:sanctum')-&gt;group(function () {
     <p>Vamos fabricar um token capado no tinker e ver a porta se fechar:</p>
     <figure class="code code--term">
       <figcaption>Terminal — php artisan tinker</figcaption>
-      <pre><code>&gt; $user = App\Models\User::first();
+      <pre><code><span class="pr">&gt; </span>$user = App\Models\User::first();
 
-&gt; $user-&gt;createToken('report-script', ['books:read'])-&gt;plainTextToken;
-= "7|pQ2mZx8Kd1..."</code></pre>
+<span class="pr">&gt; </span>$user-&gt;createToken('report-script', ['books:read'])-&gt;plainTextToken;
+<span class="out">= "7|pQ2mZx8Kd1..."</span></code></pre>
+    </figure>
+    <p>Saia do tinker e exporte os dois tokens: o capado que acabou de nascer e o normal do login (se este shell já não tiver o <code>$TOKEN</code>, refaça o <code>export</code> do Passo 6).</p>
+    <figure class="code code--term">
+      <figcaption>Terminal — troque pelo token que o tinker imprimiu</figcaption>
+      <pre><code>export LIMITED='<span class="ph">7|pQ2mZx8Kd1...</span>'
+
+echo $LIMITED $TOKEN</code></pre>
     </figure>
     <figure class="code code--term">
-      <figcaption>Terminal</figcaption>
-      <pre><code>LIMITED='7|pQ2mZx8Kd1...'   # paste the token you just generated
-
-# $TOKEN is the regular token captured with the login one-liner of Passo 6;
-# if this shell no longer has it, run that command again before the last test
-
-# reading is fine: 200
+      <figcaption>Terminal — a mesma API, dois crachás diferentes</figcaption>
+      <pre><code># reading is fine: 200
 curl -i http://localhost:8000/api/books \
   -H 'Accept: application/json' -H "Authorization: Bearer $LIMITED"
 
@@ -1545,8 +1607,8 @@ curl -i -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -d '{"email":"demo@bookshelf.test","password":"wrong-password"}'
 
-# 7. correct login: capture the token into a shell variable
-TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
+# 7. correct login: export the token into the shell environment
+export TOKEN=$(curl -s -X POST http://localhost:8000/api/login \
   -H 'Accept: application/json' -H 'Content-Type: application/json' \
   -d '{"email":"demo@bookshelf.test","password":"secret123"}' \
   | python3 -c 'import sys, json; print(json.load(sys.stdin)["token"])')
@@ -1598,18 +1660,18 @@ curl -i http://localhost:8000/api/genres \
 
   <figure class="code code--term">
     <figcaption>Terminal — php artisan tinker</figcaption>
-    <pre><code>&gt; use Laravel\Sanctum\PersonalAccessToken;
+    <pre><code><span class="pr">&gt; </span>use Laravel\Sanctum\PersonalAccessToken;
 
-&gt; PersonalAccessToken::count();          // one row per active login
-= 1
+<span class="pr">&gt; </span>PersonalAccessToken::count();          // one row per active login
+<span class="out">= 1</span>
 
-&gt; PersonalAccessToken::latest('id')-&gt;first()-&gt;only(['name', 'abilities', 'last_used_at', 'expires_at']);
-= [
+<span class="pr">&gt; </span>PersonalAccessToken::latest('id')-&gt;first()-&gt;only(['name', 'abilities', 'last_used_at', 'expires_at']);
+<span class="out">= [
     "name" =&gt; "api-token",
     "abilities" =&gt; ["*"],
     "last_used_at" =&gt; Illuminate\Support\Carbon @1772... ,
     "expires_at" =&gt; Illuminate\Support\Carbon @1772... ,
-  ]</code></pre>
+  ]</span></code></pre>
   </figure>
 
   <div class="callout callout--tip">
@@ -1657,7 +1719,7 @@ curl -i http://localhost:8000/api/genres \
 
   <p>E estes são os arquivos que nasceram ou mudaram neste módulo — o resto do projeto do Módulo 4 ficou exatamente onde estava:</p>
 
-  <figure class="code code--file">
+  <figure class="code code--file" data-nocopy>
     <figcaption>Estrutura — o que este módulo tocou</figcaption>
     <pre><code>bookshelf-api/
 ├── app/
@@ -1790,11 +1852,35 @@ curl -i http://localhost:8000/api/genres \
     });
   }
 
+  // Everything the terminal prints back — prompts, results, responses — is
+  // marked up so it can be shown but never copied. What lands on the
+  // clipboard is exactly what you can paste and run.
+  function copyableText(codeEl) {
+    var clone = codeEl.cloneNode(true);
+    // whole lines that are not yours to run: removed diff lines and output
+    Array.prototype.forEach.call(clone.querySelectorAll('.diff-del, .out'), function (el) {
+      var next = el.nextSibling;
+      if (next && next.nodeType === 3) { next.textContent = next.textContent.replace(/^\n/, ''); }
+      el.parentNode.removeChild(el);
+    });
+    // inline prompt markers ("> " in tinker, "$ " in the shell)
+    Array.prototype.forEach.call(clone.querySelectorAll('.pr'), function (el) {
+      el.parentNode.removeChild(el);
+    });
+    return clone.textContent
+      .replace(/[ \t]+$/gm, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/^\n+/, '')
+      .replace(/\s+$/, '');
+  }
+
   var blocks = document.querySelectorAll('figure.code');
   Array.prototype.forEach.call(blocks, function (fig) {
     var codeEl = fig.querySelector('pre code');
     var caption = fig.querySelector('figcaption');
     if (!codeEl || !caption) { return; }
+    // output-only blocks (and diagrams) are there to be read, not run
+    if (fig.classList.contains('code--out') || fig.hasAttribute('data-nocopy')) { return; }
 
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -1806,14 +1892,7 @@ curl -i http://localhost:8000/api/genres \
     var label = btn.querySelector('.code-copy-label');
     var resetTimer;
     btn.addEventListener('click', function () {
-      // removed (diff-del) lines must not be part of the copied code
-      var clone = codeEl.cloneNode(true);
-      Array.prototype.forEach.call(clone.querySelectorAll('.diff-del'), function (el) {
-        var next = el.nextSibling;
-        if (next && next.nodeType === 3) { next.textContent = next.textContent.replace(/^\n/, ''); }
-        el.parentNode.removeChild(el);
-      });
-      copyText(clone.textContent).then(function () {
+      copyText(copyableText(codeEl)).then(function () {
         btn.classList.add('is-copied');
         label.textContent = 'Copiado!';
         clearTimeout(resetTimer);
