@@ -952,7 +952,7 @@ class AuthController extends Controller
   </ol>
 
   <h3>Mão na massa: o novo <code>routes/api.php</code></h3>
-  <p>Substitua o conteúdo do arquivo. As duas linhas de <code>apiResource</code> do Módulo 4 continuam idênticas — só mudaram de endereço, para dentro do grupo protegido:</p>
+  <p>Substitua o conteúdo do arquivo. As duas declarações de <code>apiResource</code> do Módulo 4 continuam idênticas — só mudaram de endereço, para dentro do grupo protegido:</p>
 
   <figure class="code code--php">
     <figcaption>routes/api.php</figcaption>
@@ -969,10 +969,17 @@ use Illuminate\Support\Facades\Route;
 <span class="diff-add"></span>
 <span class="diff-add">// everything below requires a valid Bearer token</span>
 <span class="diff-add">Route::middleware('auth:sanctum')-&gt;group(function () {</span>
-    Route::apiResource('genres', GenreController::class);
-    Route::apiResource('books', BookController::class);
+    Route::apiResource('genres', GenreController::class)
+        -&gt;whereNumber('genre');
+    Route::apiResource('books', BookController::class)
+        -&gt;whereNumber('book');
 <span class="diff-add">});</span></code></pre>
   </figure>
+
+  <div class="callout callout--warn">
+    <p class="callout-label">Atenção — as restrições numéricas são obrigatórias</p>
+    <p>Ao mover as rotas do Módulo 4, mantenha também os dois <code>whereNumber()</code>. O <code>apiResource</code> usa os parâmetros <code>{genre}</code> e <code>{book}</code>, por isso os nomes das restrições são <code>genre</code> e <code>book</code> — um <code>Route::pattern('id', '[0-9]+')</code> sozinho não se aplicaria a eles. Se o seu arquivo ainda tiver as duas declarações sem essas restrições, adicione-as agora; o teste de identificador inválido do Passo 8 depende disso.</p>
+  </div>
 
   <p>Confira o resultado — a coluna <em>Middleware</em> do <code>route:list</code> é a prova visual de que o grupo pegou:</p>
 
@@ -1086,8 +1093,10 @@ public function logoutAll(Request $request)
 <span class="diff-add">    Route::post('logout', [AuthController::class, 'logout']);</span>
 <span class="diff-add">    Route::post('logout-all', [AuthController::class, 'logoutAll']);</span>
 <span class="diff-add"></span>
-    Route::apiResource('genres', GenreController::class);
-    Route::apiResource('books', BookController::class);
+    Route::apiResource('genres', GenreController::class)
+        -&gt;whereNumber('genre');
+    Route::apiResource('books', BookController::class)
+        -&gt;whereNumber('book');
 });</code></pre>
   </figure>
 
@@ -1499,9 +1508,11 @@ Route::middleware('auth:sanctum')-&gt;group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('logout-all', [AuthController::class, 'logoutAll']);
 
-    Route::apiResource('genres', GenreController::class);
-<span class="diff-del">    Route::apiResource('books', BookController::class);</span>
-<span class="diff-add">    Route::apiResource('books', BookController::class)-&gt;except('destroy');</span>
+    Route::apiResource('genres', GenreController::class)
+        -&gt;whereNumber('genre');
+    Route::apiResource('books', BookController::class)
+<span class="diff-add">        -&gt;except('destroy')</span>
+        -&gt;whereNumber('book');
 <span class="diff-add"></span>
 <span class="diff-add">    // deleting a book demands a token that was explicitly allowed to do it</span>
 <span class="diff-add">    Route::delete('books/{id}', [BookController::class, 'destroy'])</span>
@@ -1510,7 +1521,12 @@ Route::middleware('auth:sanctum')-&gt;group(function () {
 });</code></pre>
   </figure>
 
-  <p>Dois detalhes de brinde nessa declaração. O <code>-&gt;except('destroy')</code> registra o resource sem a rota de exclusão, para não haver duas rotas disputando a mesma URL. E o <code>-&gt;whereNumber('id')</code> coloca em prática a dica do Passo 7 do Módulo 4: com ele, o parâmetro só casa com dígitos, então <code>DELETE /api/books/abc</code> morre no roteador com um 404 limpo em vez de estourar um <code>TypeError</code> 500 lá dentro do controller.</p>
+  <p>Três detalhes importam nessa declaração. O <code>-&gt;except('destroy')</code> registra o resource sem a rota de exclusão, para não haver duas rotas DELETE disputando a mesma URL. O <code>-&gt;whereNumber('id')</code> exige dígitos na rota DELETE explícita. E o <code>-&gt;whereNumber('book')</code> que veio do Módulo 4 <strong>precisa continuar no resource</strong>, restringindo as rotas GET/PUT/PATCH que compartilham <code>/books/{...}</code>.</p>
+
+  <div class="callout callout--concept">
+    <p class="callout-label">Por que só restringir o DELETE produz 405?</p>
+    <p>Se <code>DELETE books/{id}</code> rejeitar <code>abc</code>, mas <code>GET|PUT|PATCH books/{book}</code> ainda aceitarem qualquer texto, o Laravel reconhece a URL <code>/api/books/abc</code> nas rotas dos outros verbos. Como nenhuma delas aceita DELETE, a resposta correta do roteador é <strong>405 Method Not Allowed</strong>. Quando <strong>ambos</strong> os parâmetros — <code>id</code> da rota explícita e <code>book</code> do resource — estão restritos, nenhuma rota reconhece essa URL e o resultado passa a ser <strong>404 Not Found</strong>. Portanto, o <code>whereNumber('id')</code> isolado não basta para esta checklist.</p>
+  </div>
 
   <div class="callout callout--tip">
     <p class="callout-label">Dica</p>
@@ -1548,6 +1564,10 @@ curl -i -X DELETE http://localhost:8000/api/books/1 \
 
 # with a regular ['*'] token from the login, the same delete works: 204
 curl -i -X DELETE http://localhost:8000/api/books/1 \
+  -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"
+
+# a non-numeric id matches no route: 404, not 405
+curl -i -X DELETE http://localhost:8000/api/books/abc \
   -H 'Accept: application/json' -H "Authorization: Bearer $TOKEN"</code></pre>
     </figure>
     <ul class="checklist">
@@ -1555,7 +1575,7 @@ curl -i -X DELETE http://localhost:8000/api/books/1 \
       <li><label><input type="checkbox" data-ck="p8-2"> <span>Com o token limitado, <code>GET /api/books</code> retorna <strong>200</strong>.</span></label></li>
       <li><label><input type="checkbox" data-ck="p8-3"> <span>Com o token limitado, <code>DELETE /api/books/1</code> retorna <strong>403</strong> — repare: 403, não 401. Ele <em>é</em> alguém; só não pode isso.</span></label></li>
       <li><label><input type="checkbox" data-ck="p8-4"> <span>Com o token normal do login, o mesmo <code>DELETE</code> retorna <strong>204</strong>.</span></label></li>
-      <li><label><input type="checkbox" data-ck="p8-5"> <span><code>DELETE /api/books/abc</code> retorna <strong>404</strong> (o <code>whereNumber</code> em ação).</span></label></li>
+      <li><label><input type="checkbox" data-ck="p8-5"> <span><code>DELETE /api/books/abc</code> retorna <strong>404</strong> (as restrições de <code>id</code> e <code>book</code> em ação), não 405.</span></label></li>
     </ul>
   </div>
 </section>

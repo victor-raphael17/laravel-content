@@ -1649,7 +1649,9 @@ class BookController extends Controller
   <div class="callout callout--concept">
     <p class="callout-label">Conceito</p>
     <p><strong>Você vai ver por aí: route model binding.</strong> Em muito código Laravel a assinatura seria <code>show(Genre $genre)</code> — o framework busca o registro e injeta o model pronto, com 404 automático. A pergunta certa para escolher entre binding e id explícito não é "qual é melhor?", e sim <strong>onde mora a busca no banco</strong>. O binding faz o fetch na camada de roteamento, <em>antes</em> do controller. Num projeto em que o controller fala direto com o Eloquent, isso é ótimo: menos código, 404 de graça. Mas no Passo 8 vamos refatorar para que <strong>só a camada Service toque o banco</strong> — e aí o binding jogaria contra: o <code>findOrFail</code> do service viraria código redundante, o acesso ao banco ficaria espalhado em duas camadas, e os services deixariam de ser autossuficientes (um job ou command que chamasse <code>update($id, $data)</code> teria que buscar o model por conta própria). Por isso, <strong>neste projeto</strong>, ids explícitos são a escolha coerente — não uma superioridade geral de um sobre o outro. Se um dia a URL usasse slug/UUID ou houvesse rotas aninhadas com escopo, a balança penderia de volta para o binding.</p>
-    <p>Uma aresta para conhecer (que, aliás, o binding <em>não</em> resolve de verdade): com o parâmetro tipado como <code>int</code>, um <code>GET /api/genres/abc</code> estoura um <code>TypeError</code> — status <strong>500</strong> — em vez de 404. Com binding implícito o mesmo request viraria <code>WHERE id = 'abc'</code>, que retorna 404 no MySQL mas estoura 500 no Postgres. Nos dois mundos a solução é a mesma: restrinja o parâmetro a dígitos com <code>-&gt;whereNumber('id')</code> na rota ou com <code>Route::pattern('id', '[0-9]+')</code> para o arquivo de rotas inteiro — aí o request morre no roteador, com 404, e nem chega ao controller.</p>
+    <p>Uma aresta para conhecer (que, aliás, o binding <em>não</em> resolve de verdade): <strong>sem uma restrição numérica</strong>, um <code>GET /api/genres/abc</code> casa com a rota GET e tenta entregar a string <code>abc</code> ao parâmetro <code>int $id</code> do controller. Isso estoura um <code>TypeError</code> — status <strong>500</strong> — em vez de 404. Com binding implícito o mesmo request viraria <code>WHERE id = 'abc'</code>, que retorna 404 no MySQL mas pode estourar 500 no Postgres.</p>
+    <p>Um <strong>405 Method Not Allowed</strong> conta outra história: nenhuma rota aceitou o <em>verbo</em> enviado, mas o Laravel encontrou a mesma URL registrada para outro verbo. Imagine que somente <code>DELETE books/{id}</code> tenha <code>-&gt;whereNumber('id')</code>, enquanto as rotas GET/PUT/PATCH de <code>books/{book}</code> continuem sem restrição. Em <code>DELETE /api/books/abc</code>, a rota DELETE rejeita <code>abc</code>, porém as rotas dos outros verbos ainda reconhecem a URL; por isso o roteador responde 405, e não 500 nem 404. Para obter 404, <strong>todas as rotas que compartilham esse segmento dinâmico precisam rejeitar o valor</strong>.</p>
+    <p>O nome dentro de <code>whereNumber()</code> ou <code>Route::pattern()</code> também precisa ser o nome real do parâmetro. Por padrão, <code>apiResource('genres', ...)</code> gera <code>{genre}</code> e <code>apiResource('books', ...)</code> gera <code>{book}</code>; portanto, <code>whereNumber('id')</code> e <code>Route::pattern('id', '[0-9]+')</code> <strong>não</strong> atingem essas rotas. Abaixo aplicaremos <code>whereNumber('genre')</code> e <code>whereNumber('book')</code> aos resources inteiros. Numa rota declarada como <code>books/{id}</code>, aí sim o nome correto é <code>id</code>. Como alternativa global, você pode definir padrões para <code>genre</code> e <code>book</code>, ou primeiro renomear os parâmetros dos resources para <code>id</code>.</p>
   </div>
 
   <div class="callout callout--warn">
@@ -1668,11 +1670,16 @@ use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\GenreController;
 use Illuminate\Support\Facades\Route;
 
-Route::apiResource('genres', GenreController::class);
-Route::apiResource('books', BookController::class);</code></pre>
+Route::apiResource('genres', GenreController::class)
+    -&gt;whereNumber('genre');
+
+Route::apiResource('books', BookController::class)
+    -&gt;whereNumber('book');</code></pre>
   </figure>
 
-  <p>Cada <code>Route::apiResource</code> registra de uma vez as cinco rotas RESTful (<code>index</code>, <code>store</code>, <code>show</code>, <code>update</code>, <code>destroy</code>) apontando para os métodos de mesmo nome do controller. Duas linhas, dez endpoints — exatamente a tabela da introdução.</p>
+  <p>Cada <code>Route::apiResource</code> registra de uma vez as cinco rotas RESTful (<code>index</code>, <code>store</code>, <code>show</code>, <code>update</code>, <code>destroy</code>) apontando para os métodos de mesmo nome do controller. Duas declarações, dez endpoints — exatamente a tabela da introdução.</p>
+
+  <p>Os dois <code>whereNumber()</code> fazem parte da implementação, não são uma dica opcional: o Laravel aplica a restrição a todas as rotas geradas pelo respectivo resource. Assim, um identificador não numérico morre no roteador com 404 antes de chegar ao controller, qualquer que seja o verbo HTTP.</p>
 
   <p>Um detalhe que o <code>route:list</code> vai revelar: o <code>update</code> é registrado como <code>PUT|PATCH</code> — os dois verbos caem no mesmo método. A rigor, <strong>PUT</strong> significa substituir o recurso inteiro e <strong>PATCH</strong>, atualizá-lo parcialmente; na prática, a maioria das APIs (a nossa incluída) aceita os dois com a mesma semântica parcial. Guarde a distinção — ela adora aparecer em entrevistas.</p>
 
@@ -1695,13 +1702,18 @@ curl http://localhost:8000/api/genres -H 'Accept: application/json'
 curl http://localhost:8000/api/books/1 -H 'Accept: application/json'
 
 # a missing id must return 404
-curl -i http://localhost:8000/api/genres/999 -H 'Accept: application/json'</code></pre>
+curl -i http://localhost:8000/api/genres/999 -H 'Accept: application/json'
+
+# non-numeric ids must also return 404 at the router
+curl -i http://localhost:8000/api/genres/abc -H 'Accept: application/json'
+curl -i -X DELETE http://localhost:8000/api/books/abc -H 'Accept: application/json'</code></pre>
     </figure>
     <ul class="checklist">
       <li><label><input type="checkbox" data-ck="p7-1"> <span><code>route:list</code> mostra as 10 rotas (5 de <code>genres</code>, 5 de <code>books</code>).</span></label></li>
       <li><label><input type="checkbox" data-ck="p7-2"> <span><code>GET /api/genres</code> devolve um array JSON com os 4 gêneros do seeder.</span></label></li>
       <li><label><input type="checkbox" data-ck="p7-3"> <span><code>GET /api/books/1</code> devolve o JSON de "The Hobbit".</span></label></li>
       <li><label><input type="checkbox" data-ck="p7-4"> <span><code>GET /api/genres/999</code> devolve status <code>404</code>.</span></label></li>
+      <li><label><input type="checkbox" data-ck="p7-5"> <span><code>GET /api/genres/abc</code> e <code>DELETE /api/books/abc</code> devolvem <strong>404</strong>, nunca 500 nem 405.</span></label></li>
     </ul>
   </div>
 </section>
